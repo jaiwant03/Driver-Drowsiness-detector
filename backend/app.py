@@ -39,6 +39,9 @@ os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 import warnings
 warnings.filterwarnings("ignore")
 
+import logging
+logging.getLogger("tensorflow").setLevel(logging.ERROR)
+
 # Fix Windows console encoding for Unicode characters
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     try:
