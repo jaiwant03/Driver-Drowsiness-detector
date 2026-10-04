@@ -665,7 +665,12 @@ function trackFps() {
   const elapsed = now - state.fpsLastTs;
   if (elapsed >= 1000) {
     state.currentFps   = Math.round(state.frameCount * 1000 / elapsed);
-    el.fpsBadge.textContent = `${state.currentFps} fps`;
+    const fpsVal = document.getElementById("fpsValue");
+    if (fpsVal) {
+      fpsVal.textContent = `${state.currentFps} fps`;
+    } else {
+      el.fpsBadge.textContent = `${state.currentFps} fps`;
+    }
     state.frameCount   = 0;
     state.fpsLastTs    = now;
   }
