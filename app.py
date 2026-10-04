@@ -89,6 +89,8 @@ _check_model(DISTRACTION_MODEL, "Distraction model (driver_distraction_resnet18_
 # Flask app
 # ---------------------------------------------------------------------------
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 CORS(app)
 
 # ---------------------------------------------------------------------------
