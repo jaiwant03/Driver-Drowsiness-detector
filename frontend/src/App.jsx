@@ -68,6 +68,14 @@ export default function App() {
 
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const mainContentRef = useRef(null);
+
+  // Automatically scroll main content back to top when switching pages
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo(0, 0);
+    }
+  }, [currentPage]);
 
   const renderPage = () => {
     switch (currentPage) {
