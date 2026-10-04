@@ -66,7 +66,7 @@ export function DrowsinessCard({ data }) {
             <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
-          <h2>DROWSINESS</h2>
+          <h2 className="ap-card-title-multicolor">DROWSINESS</h2>
         </div>
         <div className={`detection-badge ${badgeCls}`} id="drowsinessBadge">
           {badgeTxt}

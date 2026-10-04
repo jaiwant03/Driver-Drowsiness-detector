@@ -119,7 +119,7 @@ export function CameraView({
             </div>
             <h3 className="cv-placeholder-title">CAMERA READY</h3>
             <p className="cv-placeholder-sub">
-              Press <strong>START MONITORING</strong> below to begin real-time AI analysis.
+              Press <strong>START MONITORING</strong> above to begin real-time AI analysis.
             </p>
           </div>
         )}

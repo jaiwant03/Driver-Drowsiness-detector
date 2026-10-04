@@ -49,7 +49,7 @@ export function SafetyScoreCard({ score, safetyLevel, drowsinessData, distractio
   return (
     <div className="panel score-panel" aria-label="Driver Safety Score & Status">
       <div className="panel-header">
-        <h2>DRIVER SAFETY SCORE</h2>
+        <h2 className="ap-card-title-multicolor">DRIVER SAFETY SCORE</h2>
         <span className="badge-tag">AI Dynamic</span>
       </div>
 
