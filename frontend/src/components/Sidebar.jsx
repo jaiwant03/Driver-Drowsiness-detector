@@ -31,7 +31,6 @@ export function Sidebar({
       title: "SYSTEM",
       items: [
         { id: "settings", label: "Settings", icon: "settings" },
-        { id: "help", label: "Help", icon: "help-circle" },
       ],
     },
   ];
