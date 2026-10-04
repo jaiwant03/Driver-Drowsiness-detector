@@ -1,28 +1,5 @@
 import React from "react";
 
-// Subtle corner decorative wave matching the dashboard cards
-function CornerWave({ color = "#007C83", opacity = 0.12 }) {
-  return (
-    <svg
-      className="db-card-corner-wave"
-      viewBox="0 0 140 70"
-      preserveAspectRatio="none"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M0 70 C40 40 80 60 140 30 L140 70 Z"
-        fill={color}
-        fillOpacity={opacity}
-      />
-      <path
-        d="M20 70 C60 50 100 65 140 45 L140 70 Z"
-        fill={color}
-        fillOpacity={opacity * 0.7}
-      />
-    </svg>
-  );
-}
 
 export function ReportTab({
   sessionSeconds = 0,
