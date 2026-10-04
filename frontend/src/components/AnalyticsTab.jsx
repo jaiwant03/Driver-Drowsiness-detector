@@ -208,7 +208,7 @@ export function AnalyticsTab({
                   <path d="M10.5 3.08A9 9 0 1 0 20.92 13.5H10.5V3.08z" opacity="0.6" />
                 </svg>
               </span>
-              DETECTION DISTRIBUTION
+              <span className="ap-card-title-multicolor">Detection Distribution</span>
             </h2>
             <div className="ap-donut-legend-header">
               <span><span className="ap-legend-dot" style={{ background: "#16A34A" }} />Open</span>
