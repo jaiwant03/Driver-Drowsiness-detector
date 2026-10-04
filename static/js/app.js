@@ -276,6 +276,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function attachEventListeners() {
   /* Camera Controls */
   el.btnStart.addEventListener("click", startCamera);
+  const btnPlaceholderStart = $("btnPlaceholderStart");
+  if (btnPlaceholderStart) btnPlaceholderStart.addEventListener("click", startCamera);
   el.btnStop.addEventListener("click", stopCamera);
   el.btnReset.addEventListener("click", resetSession);
   el.btnFullscreen.addEventListener("click", toggleFullscreen);
@@ -298,7 +300,7 @@ function attachEventListeners() {
   el.btnCloseSettings.addEventListener("click", closeSettings);
   el.btnSaveSettings.addEventListener("click", closeSettings);
 
-  el.btnViewAllAlerts.addEventListener("click", () => switchTab("alerts"));
+  el.btnViewAllAlerts?.addEventListener("click", () => switchTab("alerts"));
   el.btnClearAlertHistory.addEventListener("click", clearAlertHistory);
 
   el.btnDismissAlarm.addEventListener("click", hideAlarm);
