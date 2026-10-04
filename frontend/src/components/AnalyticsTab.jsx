@@ -346,7 +346,7 @@ export function AnalyticsTab({
                   <polyline points="17 6 23 6 23 12" />
                 </svg>
               </span>
-              DRIVER SAFETY TREND
+              <span className="ap-card-title-multicolor">Driver Safety Trend</span>
             </h2>
             <span className="ap-card-badge">Score: {currentScore}</span>
           </div>
