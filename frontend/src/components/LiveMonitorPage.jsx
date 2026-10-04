@@ -85,7 +85,7 @@ export function LiveMonitorPage({
   const scoreColor = currentScore < 60 ? "#DC2626" : currentScore < 80 ? "#F59E0B" : "#10B981";
 
   return (
-    <div className="ap-page">
+    <div className="ap-page lm-page">
 
       {/* ── Page Header with Multi-Color Live Monitor Title ───── */}
       <div className="ap-page-header">
@@ -142,10 +142,10 @@ export function LiveMonitorPage({
       </div>
 
       {/* ── Control Action Toolbar Card (At Top, Clean & Spaced) ── */}
-      <div className="ap-card" style={{ padding: "18px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+      <div className="ap-card lm-toolbar-card">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "18px" }}>
           {/* Action Buttons Group */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
             <button
               className="ap-btn ap-btn-primary"
               style={{ padding: "12px 24px", fontSize: "14px" }}
