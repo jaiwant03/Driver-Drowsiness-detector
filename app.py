@@ -201,8 +201,19 @@ def _decode_image(req: "request") -> Image.Image:
 
 @app.route("/")
 def index():
-    """Serve the dashboard."""
+    """Serve the dashboard (React + Vite build if present, else fallback to templates)."""
+    if FRONTEND_DIST.exists() and (FRONTEND_DIST / "index.html").exists():
+        return send_from_directory(FRONTEND_DIST, "index.html")
     return render_template("index.html")
+
+
+@app.route("/assets/<path:path>")
+def serve_react_assets(path):
+    """Serve React frontend static assets from dist/assets."""
+    assets_dir = FRONTEND_DIST / "assets"
+    if assets_dir.exists():
+        return send_from_directory(assets_dir, path)
+    return "", 404
 
 
 @app.route("/health", methods=["GET"])
