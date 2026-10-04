@@ -148,6 +148,22 @@ export function SafetyScoreCard({ score, safetyLevel, drowsinessData, distractio
             </strong>
           </div>
         </div>
+
+        {/* Safety System Metrics Row (Symmetrical with other cards) */}
+        <div className="timer-row">
+          <div className="timer-cell">
+            <span className="timer-label">Algorithm</span>
+            <strong>MobileNet+Shuffle</strong>
+          </div>
+          <div className="timer-cell">
+            <span className="timer-label">Pipeline</span>
+            <strong>Dual Neural Vision</strong>
+          </div>
+          <div className="timer-cell">
+            <span className="timer-label">Risk Level</span>
+            <strong style={{ color: scoreColor }}>{scoreLabel}</strong>
+          </div>
+        </div>
       </div>
     </div>
   );
