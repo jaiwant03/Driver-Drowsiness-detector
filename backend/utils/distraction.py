@@ -249,7 +249,7 @@ class DistractionDetector:
                 "Place driver_distraction_resnet18_complete.pth in models/."
             )
 
-        print(f"[Distraction] Loading checkpoint -> {self.model_path}  (device={self.device})")
+        # weights_only=False needed because the checkpoint is a full dict
 
         # weights_only=False needed because the checkpoint is a full dict
         # (includes non-tensor values like class_names list, accuracy floats)
@@ -266,19 +266,12 @@ class DistractionDetector:
             self.class_names = [str(c).strip() for c in checkpoint["class_names"]]
             self.num_classes_from_ckpt = int(checkpoint.get("num_classes", len(self.class_names)))
             img_size         = int(checkpoint.get("image_size", IMAGE_SIZE))
-            print(
-                f"[Distraction] Checkpoint type: FULL  "
-                f"| classes={len(self.class_names)}  "
-                f"| image_size={img_size}  "
-                f"| test_acc={checkpoint.get('test_accuracy', 'N/A')}"
-            )
         elif isinstance(checkpoint, dict) and "class_names" in checkpoint:
             # Alternative checkpoint layout (state dict is the whole dict minus meta)
             self.class_names = [str(c).strip() for c in checkpoint["class_names"]]
             self.num_classes_from_ckpt = len(self.class_names)
             state_dict = {k: v for k, v in checkpoint.items()
                           if isinstance(v, torch.Tensor)}
-            print(f"[Distraction] Checkpoint type: PARTIAL  | classes={len(self.class_names)}")
         elif isinstance(checkpoint, dict):
             # Bare state_dict
             self.class_names = list(FALLBACK_CLASSES)
