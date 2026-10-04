@@ -23,7 +23,8 @@ torch>=2.0.0
 # ── Computer vision ────────────────────────────────────────────────
 # opencv-python provides the Haar cascade face detector used by
 # the drowsiness module.
-opencv-python>=4.8.0
+# Note: Use 4.x (not 5.x) for compatibility with CascadeClassifier
+opencv-python>=4.8.0,<5.0.0
 
 # ── Numerical / image utilities ────────────────────────────────────
 numpy>=1.24.0
