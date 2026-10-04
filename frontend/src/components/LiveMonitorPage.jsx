@@ -215,7 +215,7 @@ export function LiveMonitorPage({
       </div>
 
       {/* ── 4 KPI Metric Cards Grid (Standardized Across App) ─── */}
-      <div className="ap-kpi-grid">
+      <div className="ap-kpi-grid lm-kpi-grid">
         {/* Card 1: Monitoring State */}
         <div className="ap-kpi-card">
           <div className="ap-kpi-header">
@@ -303,7 +303,7 @@ export function LiveMonitorPage({
       </div>
 
       {/* ── Optical Video Stream (Kept DOWN at the Bottom) ─────── */}
-      <div className="ap-card" style={{ padding: "20px 24px" }}>
+      <div className="ap-card lm-camera-card">
         <div className="ap-card-header">
           <h2 className="ap-card-title">
             <span className="ap-card-title-icon" aria-hidden="true">

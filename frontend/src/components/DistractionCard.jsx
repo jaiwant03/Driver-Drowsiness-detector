@@ -119,6 +119,15 @@ export function DistractionCard({ data }) {
             <span className="timer-label">Frames</span>
             <strong id="distractFrames">{frames}</strong>
           </div>
+          <div className="timer-cell">
+            <span className="timer-label">Focus</span>
+            <strong
+              id="distractFocus"
+              style={{ color: isDistracted ? "#F59E0B" : "#10B981" }}
+            >
+              {isDistracted ? "OFF-ROAD" : "ROAD"}
+            </strong>
+          </div>
         </div>
       </div>
     </div>
