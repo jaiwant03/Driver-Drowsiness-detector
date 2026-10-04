@@ -8,7 +8,6 @@ import { AlertsPage } from "./components/AlertsPage";
 import { ReportsPage } from "./components/ReportsPage";
 import { HistoryPage } from "./components/HistoryPage";
 import { SettingsPage } from "./components/SettingsPage";
-import { HelpPage } from "./components/HelpPage";
 import { Modals } from "./components/Modals";
 import { AlertBanner } from "./components/AlertBanner";
 
