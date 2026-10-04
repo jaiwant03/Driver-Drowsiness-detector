@@ -60,6 +60,12 @@
   --neutral-border:    #E2E8F0;
   --neutral-text:      #475569;
 
+  /* Compatibility Aliases for Dynamic JS Style Variables */
+  --clr-danger:        #DC2626;
+  --clr-safe:          #059669;
+  --clr-warn:          #D97706;
+  --clr-text:          #0F2747;
+
   /* Typography */
   --font-main:         "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-heading:      "Plus Jakarta Sans", "Inter", sans-serif;
