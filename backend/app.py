@@ -200,23 +200,6 @@ def _decode_image(req: "request") -> Image.Image:
 # Routes
 # ---------------------------------------------------------------------------
 
-@app.route("/")
-def index():
-    """Serve the dashboard (React + Vite build if present, else fallback to templates)."""
-    if FRONTEND_DIST.exists() and (FRONTEND_DIST / "index.html").exists():
-        return send_from_directory(FRONTEND_DIST, "index.html")
-    return render_template("index.html")
-
-
-@app.route("/assets/<path:path>")
-def serve_react_assets(path):
-    """Serve React frontend static assets from dist/assets."""
-    assets_dir = FRONTEND_DIST / "assets"
-    if assets_dir.exists():
-        return send_from_directory(assets_dir, path)
-    return "", 404
-
-
 @app.route("/health", methods=["GET"])
 @app.route("/api/health", methods=["GET"])
 def health():
@@ -342,7 +325,8 @@ def reset():
 if __name__ == "__main__":
     host = os.getenv("HOST", "127.0.0.1")
     port = int(os.getenv("PORT", "5000"))
-    print(f"  Dashboard  ->  http://{host}:{port}")
+    print(f"  API only   ->  http://{host}:{port}/api/health")
     print(f"  Health API ->  http://{host}:{port}/api/health")
+    print(f"  Frontend   ->  run 'npm run dev' in the frontend/ folder")
     print()
     app.run(host=host, port=port, debug=False, threaded=True)
