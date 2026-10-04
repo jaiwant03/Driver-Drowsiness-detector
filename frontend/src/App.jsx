@@ -95,13 +95,15 @@ export default function App() {
       }
       setShowScrollTop(scrollY > 300);
 
-      // Section spy to highlight current active tab
+      // Section spy to highlight current active tab accurately
       const sections = ["live", "analytics", "alerts", "report"];
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = document.getElementById(`${sections[i]}-section`);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= 160) {
+      if (scrollY < 180) {
+        setActiveTab("live");
+      } else {
+        const scrollTrigger = scrollY + 160;
+        for (let i = sections.length - 1; i >= 0; i--) {
+          const el = document.getElementById(`${sections[i]}-section`);
+          if (el && el.offsetTop <= scrollTrigger) {
             setActiveTab(sections[i]);
             break;
           }
