@@ -742,26 +742,29 @@ html, body {
 .camera-col {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 
 .camera-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
 
 .camera-viewport-wrap {
   flex: 1;
-  padding: 10px 12px;
+  padding: 8px 10px;
   display: flex;
-  min-height: 440px;
+  min-height: 0;
 }
 
 .video-wrap {
   position: relative;
   width: 100%;
-  min-height: 440px;
   height: 100%;
+  min-height: 0;
   background: #0B0F19;
   border-radius: var(--radius-inner);
   overflow: hidden;
