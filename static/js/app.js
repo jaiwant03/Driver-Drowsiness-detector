@@ -648,12 +648,20 @@ function resetUI() {
   el.statDrowsyEvents.textContent   = "0";
   el.statDistractEvents.textContent = "0";
   el.statSafety.textContent         = "—";
+  el.statSafety.style.color         = "";
+  const statSafetyDot = document.querySelector(".safety-indicator-dot");
+  if (statSafetyDot) statSafetyDot.style.backgroundColor = "#94A3B8";
 
   /* Inference */
   el.inferenceTime.textContent = "— ms";
 
   /* FPS */
-  el.fpsBadge.textContent = "— fps";
+  const fpsVal = document.getElementById("fpsValue");
+  if (fpsVal) {
+    fpsVal.textContent = "— fps";
+  } else {
+    el.fpsBadge.textContent = "— fps";
+  }
 }
 
 /* =========================================================
