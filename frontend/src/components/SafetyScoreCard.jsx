@@ -64,7 +64,7 @@ export function SafetyScoreCard({ score, safetyLevel, drowsinessData, distractio
                 cy="60"
                 r="50"
                 stroke="#F1F5F9"
-                strokeWidth="10"
+                strokeWidth="8"
                 fill="none"
               />
               <circle
@@ -74,7 +74,7 @@ export function SafetyScoreCard({ score, safetyLevel, drowsinessData, distractio
                 cy="60"
                 r="50"
                 stroke={scoreColor}
-                strokeWidth="10"
+                strokeWidth="8"
                 fill="none"
                 strokeDasharray="314.16"
                 strokeDashoffset={dashOffset}
@@ -85,19 +85,25 @@ export function SafetyScoreCard({ score, safetyLevel, drowsinessData, distractio
             <div className="score-center-text">
               <span className="score-number" id="scoreValue">{score}</span>
               <span className="score-out-of">/ 100</span>
-              <span
-                className="score-rating-label"
-                id="scoreLabel"
-                style={{ color: scoreColor }}
-              >
-                {scoreLabel}
-              </span>
             </div>
           </div>
 
           {/* Prominent Current Driver Status Section */}
           <div className="driver-status-hero">
-            <span className="hero-status-title">CURRENT DRIVER STATUS</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+              <span className="hero-status-title">CURRENT DRIVER STATUS</span>
+              <span
+                id="scoreLabel"
+                className="score-rating-pill"
+                style={{
+                  background: `${scoreColor}14`,
+                  color: scoreColor,
+                  border: `1px solid ${scoreColor}35`,
+                }}
+              >
+                {scoreLabel}
+              </span>
+            </div>
             <div className="hero-status-display" id="heroStatusDisplay">
               <span className="hero-status-icon" id="heroStatusIcon">{heroIcon}</span>
               <strong
