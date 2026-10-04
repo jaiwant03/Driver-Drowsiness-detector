@@ -5,16 +5,17 @@
   --sb-width:           240px;
   --sb-collapsed-width: 68px;
 
-  /* page background */
-  --bg-page:       #F8FAFC;
+  /* page background - bright, clean, luminous */
+  --bg-page:       #FAFCFF;
   --bg-card:       #FFFFFF;
 
   /* teal/blue palette (sidebar + accents) */
   --teal:          #0D9488;
   --teal-dark:     #0F766E;
   --teal-light:    #CCFBF1;
-  --blue:          #0EA5E9;
-  --blue-dark:     #0284C7;
+  --teal-bright:   #00E5FF;
+  --blue:          #0284C7;
+  --blue-dark:     #0369A1;
   --blue-light:    #E0F2FE;
 
   /* orange (buttons, alerts) */
@@ -122,13 +123,22 @@
   line-height: 1.1;
 }
 
+.sb-brand-gradient {
+  background: linear-gradient(135deg, #00C4DF 0%, #10B981 45%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .sb-brand-badge {
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.9px;
   text-transform: uppercase;
   color: #0D9488;
   font-family: "Inter", sans-serif;
+  display: inline-block;
+  margin-top: 1px;
 }
 
 /* ── Nav ───────────────────────────────────────────────────────── */
