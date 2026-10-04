@@ -972,13 +972,13 @@ html, body {
 
 /* Camera Controls Strip */
 .camera-controls-strip {
-  height: 48px;
-  min-height: 48px;
-  max-height: 48px;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 12px;
   border-top: 1px solid var(--slate-border);
   background: #FFFFFF;
   flex-shrink: 0;
@@ -987,7 +987,7 @@ html, body {
 .controls-left, .controls-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Clean Button System */
@@ -1006,9 +1006,9 @@ html, body {
 }
 
 .btn-ctrl {
-  padding: 0 15px;
-  height: 36px;
-  font-size: 13px;
+  padding: 0 12px;
+  height: 32px;
+  font-size: 12px;
 }
 
 .btn-primary {
@@ -1075,13 +1075,13 @@ html, body {
 .session-timer-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: var(--bg-card-subtle);
   border: 1px solid var(--slate-border);
-  padding: 0 14px;
-  height: 36px;
+  padding: 0 10px;
+  height: 32px;
   border-radius: var(--radius-pill);
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--navy-dark);
 }
