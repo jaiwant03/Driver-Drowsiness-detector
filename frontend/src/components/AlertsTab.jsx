@@ -193,7 +193,7 @@ export function AlertsTab({ alertHistory = [], onClear, onOpenGallery, snapshotC
                 <line x1="3" y1="18" x2="3.01" y2="18" />
               </svg>
             </span>
-            Incident Audit Log
+            <span className="ap-card-title-multicolor">Incident Audit Log</span>
           </h2>
           <span className="ap-card-badge">
             {alertHistory.length} {alertHistory.length === 1 ? "Event" : "Events"} Recorded
