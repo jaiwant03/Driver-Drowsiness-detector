@@ -89,26 +89,60 @@ export function Sidebar({
         {/* ── Brand ──────────────────────────────────────────── */}
         <div className="sb-brand">
           <div className="sb-shield-logo">
-            <svg width="34" height="34" viewBox="0 0 32 32" fill="none">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="multiShieldStroke" x1="2" y1="2" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#00E5FF" />
+                  <stop offset="30%" stopColor="#10B981" />
+                  <stop offset="65%" stopColor="#8B5CF6" />
+                  <stop offset="100%" stopColor="#FF4081" />
+                </linearGradient>
+                <linearGradient id="multiShieldFill" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.22" />
+                  <stop offset="50%" stopColor="#10B981" stopOpacity="0.16" />
+                  <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.20" />
+                </linearGradient>
+                <linearGradient id="multiCoreGrad" x1="8" y1="8" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#00F0FF" />
+                  <stop offset="45%" stopColor="#10B981" />
+                  <stop offset="85%" stopColor="#7C3AED" />
+                  <stop offset="100%" stopColor="#EC4899" />
+                </linearGradient>
+                <filter id="multiShieldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#00E5FF" floodOpacity="0.4" />
+                </filter>
+              </defs>
+              {/* Outer multi-color shield contour */}
               <path
-                d="M16 3L5 7.5V15C5 22.2 9.7 28 16 29.5C22.3 28 27 22.2 27 15V7.5L16 3Z"
-                stroke="#0D9488"
+                d="M18 3L6 8V17C6 25 11.2 31.5 18 33C24.8 31.5 30 25 30 17V8L18 3Z"
+                stroke="url(#multiShieldStroke)"
                 strokeWidth="2.8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                fill="#0D9488"
-                fillOpacity="0.1"
+                fill="url(#multiShieldFill)"
+                filter="url(#multiShieldGlow)"
               />
+              {/* Inner core shield */}
               <path
-                d="M16 6.5L8.5 10V15C8.5 20.2 11.7 24.8 16 26.2C20.3 24.8 23.5 20.2 23.5 15V10L16 6.5Z"
-                fill="#0D9488"
-                fillOpacity="0.85"
+                d="M18 7.5L9.5 11.5V17C9.5 22.8 13.1 27.8 18 29.2C22.9 27.8 26.5 22.8 26.5 17V11.5L18 7.5Z"
+                fill="url(#multiCoreGrad)"
+                fillOpacity="0.9"
+              />
+              {/* Check emblem */}
+              <path
+                d="M14 17.5L16.5 20L22 14.5"
+                stroke="#FFFFFF"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </div>
           {!collapsed && (
             <div className="sb-brand-text">
-              <span className="sb-brand-name">DriverGuard</span>
+              <span className="sb-brand-name">
+                Driver<span className="sb-brand-gradient">Guard</span>
+              </span>
               <span className="sb-brand-badge">AI MONITORING</span>
             </div>
           )}

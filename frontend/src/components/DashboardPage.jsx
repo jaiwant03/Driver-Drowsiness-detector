@@ -161,8 +161,33 @@ export function DashboardPage({
         <BannerWave />
 
         <div className="db-banner-watermark" aria-hidden="true">
-          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <svg width="46" height="46" viewBox="0 0 32 32" fill="none">
+            <defs>
+              <linearGradient id="dbBannerMultiShield" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#00E5FF" />
+                <stop offset="35%" stopColor="#10B981" />
+                <stop offset="70%" stopColor="#8B5CF6" />
+                <stop offset="100%" stopColor="#FF4081" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M16 3L5 7.5V15C5 22.2 9.7 28 16 29.5C22.3 28 27 22.2 27 15V7.5L16 3Z"
+              stroke="url(#dbBannerMultiShield)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="url(#dbBannerMultiShield)"
+              fillOpacity="0.10"
+            />
+            <path
+              d="M16 7.5L9 11V15C9 20 12 24.5 16 25.8C20 24.5 23 20 23 15V11L16 7.5Z"
+              stroke="url(#dbBannerMultiShield)"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              opacity="0.8"
+            />
           </svg>
         </div>
       </div>
@@ -189,7 +214,7 @@ export function DashboardPage({
               style={{ width: `${Math.min(100, Math.max(0, currentScore))}%`, background: scoreBarColor }}
             />
           </div>
-          <CornerWave color="#0D9488" opacity={0.09} />
+          <CornerWave color="#00D2B4" opacity={0.14} />
         </div>
 
         {/* Card 2: Session Time */}
@@ -205,13 +230,13 @@ export function DashboardPage({
           </div>
           <div className="db-card-val-navy">{formatTime(sessionSeconds)}</div>
           <div className="db-card-sub">Duration</div>
-          <CornerWave color="#0EA5E9" opacity={0.08} />
+          <CornerWave color="#00A3FF" opacity={0.12} />
         </div>
 
         {/* Card 3: Frames Analyzed */}
         <div className="db-card">
           <div className="db-card-header">
-            <div className="db-card-icon db-icon-blue">
+            <div className="db-card-icon db-icon-indigo">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
                 <circle cx="12" cy="13" r="3" />
@@ -221,13 +246,13 @@ export function DashboardPage({
           </div>
           <div className="db-card-val-navy">{maxFrames.toLocaleString()}</div>
           <div className="db-card-sub">Total frames</div>
-          <CornerWave color="#0EA5E9" opacity={0.07} />
+          <CornerWave color="#3B82F6" opacity={0.12} />
         </div>
 
         {/* Card 4: Drowsy Events */}
         <div className="db-card">
           <div className="db-card-header">
-            <div className="db-card-icon db-icon-cyan">
+            <div className="db-card-icon db-icon-amber">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                 <circle cx="12" cy="12" r="3" />
@@ -237,7 +262,7 @@ export function DashboardPage({
           </div>
           <div className="db-card-val-navy">{drowsyEvents}</div>
           <div className="db-card-sub">Detected</div>
-          <CornerWave color="#F97316" opacity={0.08} />
+          <CornerWave color="#FF9100" opacity={0.14} />
         </div>
       </div>
 
@@ -246,7 +271,7 @@ export function DashboardPage({
         {/* Card 5: Yawns */}
         <div className="db-card">
           <div className="db-card-header">
-            <div className="db-card-icon db-icon-blue">
+            <div className="db-card-icon db-icon-purple">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M8 14s1.5 2 4 2 4-2 4-2" />
@@ -258,7 +283,7 @@ export function DashboardPage({
           </div>
           <div className="db-card-val-navy">{yawnEvents}</div>
           <div className="db-card-sub">Detected</div>
-          <CornerWave color="#8B5CF6" opacity={0.07} />
+          <CornerWave color="#A855F7" opacity={0.13} />
         </div>
 
         {/* Card 6: Distraction Events */}
@@ -275,7 +300,7 @@ export function DashboardPage({
           </div>
           <div className="db-card-val-navy">{distractEvents}</div>
           <div className="db-card-sub">Detected</div>
-          <CornerWave color="#EF4444" opacity={0.08} />
+          <CornerWave color="#FF3B30" opacity={0.13} />
         </div>
 
         {/* Empty placeholder cells to maintain strict 4-column alignment */}
