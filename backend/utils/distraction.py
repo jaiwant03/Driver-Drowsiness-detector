@@ -286,18 +286,9 @@ class DistractionDetector:
         # ---- Build and load model ----
         self.model = ResNet18(num_classes=len(self.class_names))
         missing, unexpected = self.model.load_state_dict(state_dict, strict=False)
-        if missing:
-            print(f"[Distraction] WARNING: missing keys  -> {missing}")
-        if unexpected:
-            print(f"[Distraction] WARNING: unexpected keys -> {unexpected}")
 
         self.model.to(self.device)
         self.model.eval()
-
-        print(
-            f"[Distraction] ResNet-18 loaded  | "
-            f"device={self.device}  | classes={self.class_names}"
-        )
 
     def _preprocess(self, image: Image.Image) -> torch.Tensor:
         """
