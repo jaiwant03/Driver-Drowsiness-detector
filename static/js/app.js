@@ -367,10 +367,30 @@ function updateSafetyLevel(level, message) {
 
   /* Show inline alert banner for danger states */
   if (level === "DROWSY" || level === "DISTRACTED" || level === "CRITICAL") {
-    showBanner(message || cfg.badge);
+    showBanner(message || cfg.badge, level);
+  } else {
+    hideBanner();
   }
 
+  /* Update safety stat value & dynamic indicator dot in bottom summary bar */
+  const statSafetyDot = document.querySelector(".safety-indicator-dot");
+  if (statSafetyDot) {
+    const dotColors = {
+      SAFE:        "#10B981",
+      DROWSY:      "#EF4444",
+      DISTRACTED:  "#F59E0B",
+      CRITICAL:    "#DC2626",
+      WAITING:     "#94A3B8",
+      MONITORING:  "#2563EB",
+    };
+    statSafetyDot.style.backgroundColor = dotColors[level] || "#94A3B8";
+  }
   el.statSafety.textContent = cfg.badge;
+  if (level === "SAFE") el.statSafety.style.color = "#059669";
+  else if (level === "DROWSY") el.statSafety.style.color = "#DC2626";
+  else if (level === "DISTRACTED") el.statSafety.style.color = "#D97706";
+  else if (level === "CRITICAL") el.statSafety.style.color = "#B91C1C";
+  else el.statSafety.style.color = "var(--navy-dark)";
 }
 
 /* ─── Drowsiness panel ─────────────────────────────────── */
