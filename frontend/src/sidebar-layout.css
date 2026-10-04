@@ -1046,20 +1046,26 @@
 }
 
 .db-hero-greeting {
-  font-size: 28px;
-  font-weight: 800;
-  color: #0A1128;
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #0284C7 0%, #06B6D4 22%, #10B981 50%, #8B5CF6 78%, #EC4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 10px rgba(6, 182, 212, 0.20));
   margin: 0;
-  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
-  letter-spacing: -0.4px;
-  line-height: 1.2;
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
 }
 
 .db-hero-sub {
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
   color: #475569;
   margin: 0;
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+  letter-spacing: -0.2px;
 }
 
 .db-hero-brand-multi {
