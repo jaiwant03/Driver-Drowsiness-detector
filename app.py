@@ -42,7 +42,7 @@ if sys.stderr and hasattr(sys.stderr, "reconfigure"):
     except Exception:
         pass
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS
 from PIL import Image, UnidentifiedImageError
 
@@ -50,6 +50,7 @@ from PIL import Image, UnidentifiedImageError
 # Path setup
 # ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parent
+FRONTEND_DIST = ROOT / "frontend" / "dist"
 sys.path.insert(0, str(ROOT))
 
 from utils.drowsiness   import DrowsinessDetector
