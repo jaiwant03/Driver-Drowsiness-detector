@@ -1,334 +1,437 @@
-# DriverGuard — Driver Drowsiness & Distraction Detection System
+# 🛡️ DriverGuard — AI-Powered Driver Safety Monitoring
 
-Real-time driver monitoring using **one webcam** and **two independent deep-learning models**, served through a local Flask backend with a live browser dashboard.
+Real-time driver drowsiness and distraction detection using AI deep learning models with a modern React dashboard.
 
----
-
-## Overview
-
-```
-Browser webcam
-      │
-      ▼  (JPEG frame, ~640 px wide)
-POST /api/predict
-      │
-      ├─► DrowsinessDetector  →  best_finetuned.keras
-      │     MobileNetV2 + face crop (Haar cascade)
-      │     Classes: Closed / Open / no_yawn / yawn
-      │     Drowsy = Closed or yawn
-      │
-      └─► DistractionDetector → driver_distraction_resnet18_complete.pth
-            ResNet-18 (pure PyTorch, no torchvision)
-            10 classes from State Farm Distracted Driver dataset
-            Distracted = any class except "Safe Driving"
-      │
-      ▼
-JSON  { drowsiness: {...}, distraction: {...}, safety_level, alarm }
-      │
-      ▼
-Dashboard  (live video · dual prediction cards · alerts)
-```
-
-Both models run on every frame. They share the same raw camera image but use completely separate preprocessing pipelines.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.8+-green.svg)
+![React](https://img.shields.io/badge/react-19-blue.svg)
 
 ---
 
-## Project Structure
+## 📋 Overview
+
+DriverGuard is a comprehensive driver monitoring system that uses:
+- **Computer Vision** to detect drowsiness (eyes closed, yawning)
+- **Deep Learning** to identify driver distractions
+- **Real-time Processing** for immediate safety alerts
+- **Modern UI** with React-based dashboard
+
+### Architecture
+
+```
+Browser Camera
+      │
+      ▼ (JPEG frames ~30 FPS)
+React Frontend (localhost:5173)
+      │
+      ▼ HTTP/API
+Flask Backend (localhost:5000)
+      │
+      ├─► Drowsiness Model (MobileNetV2)
+      │   └─ Eyes: Open/Closed, Yawn: Yes/No
+      │
+      └─► Distraction Model (ResNet-18)
+          └─ 10 distraction behaviors
+      │
+      ▼
+JSON Response
+      │
+      └─ Live Dashboard Updates
+```
+
+---
+
+## 🏗️ Project Structure (NEW - Organized)
 
 ```
 driver-drowsiness-model/
 │
-├── app.py                          ← Flask backend (entry point)
+├── backend/                    ← Flask API Server
+│   ├── app.py                 ← Main Flask application
+│   ├── requirements.txt       ← Python dependencies
+│   ├── utils/                 ← Detection modules
+│   │   ├── drowsiness.py     ← Drowsiness detector
+│   │   ├── distraction.py    ← Distraction detector
+│   │   └── resnet.py         ← ResNet architecture
+│   └── README.md              ← Backend documentation
 │
-├── models/
-│   ├── best_finetuned.keras        ← Drowsiness model
-│   ├── driver_distraction_resnet18_complete.pth  ← Distraction model
-│   └── class_names.json            ← Drowsiness class index map
+├── frontend/                   ← React Application
+│   ├── src/
+│   │   ├── components/       ← React components
+│   │   ├── hooks/            ← Custom hooks
+│   │   ├── App.jsx           ← Main app
+│   │   └── ...
+│   ├── package.json          ← Node dependencies
+│   └── README.md             ← Frontend documentation
 │
-├── utils/
-│   ├── drowsiness.py               ← DrowsinessDetector class
-│   ├── distraction.py              ← DistractionDetector class
-│   ├── resnet.py                   ← Pure-PyTorch ResNet-18 (no torchvision)
-│   └── __init__.py
+├── models/                     ← AI Model Weights
+│   ├── best_finetuned.keras                    ← Drowsiness model (~24MB)
+│   ├── driver_distraction_resnet18_complete.pth ← Distraction model (~45MB)
+│   ├── class_names.json                         ← Class labels
+│   └── README.md                                ← Models documentation
 │
-├── templates/
-│   └── index.html                  ← Dashboard HTML (served by Flask)
-│
-├── static/
-│   ├── css/style.css               ← Dark-theme dashboard styles
-│   └── js/app.js                   ← Camera capture + UI update logic
-│
-├── requirements.txt
-└── README.md
+├── Driver_Drowsiness.ipynb     ← Training notebook (drowsiness)
+├── driver_distraction.ipynb    ← Training notebook (distraction)
+├── README.md                   ← This file
+└── .gitignore
 ```
 
 ---
 
-## Model Details
+## 🚀 Quick Start
 
-### Drowsiness Model — `best_finetuned.keras`
+### Prerequisites
+- **Python 3.8+**
+- **Node.js 16+** and npm
+- **Webcam**
+- **4GB RAM** minimum (8GB recommended)
 
-| Property | Value |
-|---|---|
-| Architecture | MobileNetV2 (fine-tuned) |
-| Framework | TensorFlow / Keras |
-| Input size | 224 × 224 × 3 |
-| Input range | `[0, 255]` float32 — the `.keras` file contains a built-in `Rescaling(1/127.5, −1)` layer |
-| Pre-processing | Resize → float32 cast (model rescales internally) |
-| Face detection | OpenCV Haar cascade (`haarcascade_frontalface_default.xml`) |
-| Output | 4-class softmax |
-| Classes | `{0: Closed, 1: Open, 2: no_yawn, 3: yawn}` |
-| Drowsy classes | `Closed`, `yawn` |
-| Alert classes | `Open`, `no_yawn` |
+### Installation
 
-**Preprocessing code (matches notebook `predict_image()`):**
-```python
-img = image.resize((224, 224), Image.Resampling.BILINEAR)
-arr = np.asarray(img, dtype=np.float32)       # [0, 255] — NOT divided
-batch = np.expand_dims(arr, axis=0)           # (1, 224, 224, 3)
-probs = model.predict(batch)[0]               # built-in Rescaling applies
-```
-
----
-
-### Distraction Model — `driver_distraction_resnet18_complete.pth`
-
-| Property | Value |
-|---|---|
-| Architecture | ResNet-18 |
-| Framework | PyTorch |
-| Input size | 224 × 224 × 3 |
-| Input range | ImageNet-normalised float32 |
-| Normalization mean | `[0.485, 0.456, 0.406]` |
-| Normalization std | `[0.229, 0.224, 0.225]` |
-| Checkpoint format | Full dict: `{model_state_dict, class_names, image_size, num_classes, test_accuracy, test_macro_f1}` |
-| Output | 10-class logits → softmax |
-
-**Preprocessing code (matches notebook `val_transform`):**
-```python
-img  = image.resize((224, 224), Image.Resampling.BILINEAR)
-arr  = np.asarray(img, dtype=np.float32) / 255.0
-arr  = (arr - [0.485, 0.456, 0.406]) / [0.229, 0.224, 0.225]
-tensor = torch.from_numpy(arr.transpose(2, 0, 1)).unsqueeze(0)
-```
-
-**Classes (from checkpoint `class_names`, State Farm Distracted Driver dataset):**
-
-| Index | Class |
-|---|---|
-| 0 | Safe Driving |
-| 1 | Texting - Right Hand |
-| 2 | Phone Call - Right Hand |
-| 3 | Texting - Left Hand |
-| 4 | Phone Call - Left Hand |
-| 5 | Operating Radio |
-| 6 | Drinking |
-| 7 | Reaching Behind |
-| 8 | Hair / Makeup |
-| 9 | Talking to Passenger |
-
-Class 0 = not distracted. Any other class = distracted.
-
----
-
-## Installation
-
-### 1. Clone / open the project
-
+1. **Clone the repository:**
 ```bash
-cd driver-drowsiness-model
+cd "d:\Dev\Projects\Driver_Drowsyness project\driver-drowsiness-model"
 ```
 
-### 2. Create a virtual environment
-
+2. **Backend Setup:**
 ```bash
+cd backend
+
+# Create virtual environment
 python -m venv venv
-```
 
-**Windows:**
-```bash
+# Activate (Windows)
 venv\Scripts\activate
-```
+# Or macOS/Linux:
+# source venv/bin/activate
 
-**macOS / Linux:**
-```bash
-source venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+cd ..
 ```
 
-> **Windows note:** If you see an `optree` error from TensorFlow, uncomment the `optree==0.14.0` line in `requirements.txt` and re-run.
+3. **Frontend Setup:**
+```bash
+cd frontend
 
-### 4. Verify model files are in place
+# Install dependencies
+npm install
 
+cd ..
 ```
-models/best_finetuned.keras
-models/driver_distraction_resnet18_complete.pth
-```
-
-The server will print a clear error and exit if either file is missing.
 
 ---
 
-## Running the Application
+## ▶️ Running the Application
+
+You need **TWO terminal windows**:
+
+### Terminal 1: Backend (Flask API)
 
 ```bash
+cd backend
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # macOS/Linux
 python app.py
 ```
 
-You should see:
-
+**Expected Output:**
 ```
 ======================================================================
-  DRIVER MONITORING SYSTEM  —  Starting up
+  DRIVER MONITORING SYSTEM  --  Starting up
 ======================================================================
-  Drowsiness model   : models/best_finetuned.keras
-  Distraction model  : models/driver_distraction_resnet18_complete.pth
+✓ Drowsiness model loaded (4 classes)
+✓ Distraction model loaded (10 classes)
 
-[Drowsiness] Loading model → ...
-[Drowsiness] OK — input=(None, 224, 224, 3)  output=(None, 4)
-[Distraction] Loading checkpoint → ...
-[Distraction] ResNet-18 loaded | device=cpu | classes=[...]
-
-======================================================================
-  BOTH MODELS LOADED SUCCESSFULLY
-======================================================================
-
-  Dashboard  →  http://127.0.0.1:5000
-  Health API →  http://127.0.0.1:5000/api/health
+Dashboard  ->  http://127.0.0.1:5000
 ```
 
-Open **http://127.0.0.1:5000** in your browser.
+### Terminal 2: Frontend (React Dev Server)
+
+```bash
+cd frontend
+npm run dev
+```
+
+**Expected Output:**
+```
+  VITE v8.3.2  ready in 358 ms
+  ➜  Local:   http://127.0.0.1:5173/
+```
+
+### Access the Application
+
+Open your browser and navigate to: **http://localhost:5173**
 
 ---
 
-## Camera Permissions
+## 🎯 Features
 
-When you click **Start Monitoring**, the browser will ask for camera access.
+### Frontend (React Dashboard)
+- ✅ **Dashboard** - Overview with key safety metrics
+- ✅ **Live Monitor** - Real-time camera feed with AI detection
+- ✅ **Analytics** - Charts and session statistics
+- ✅ **Alerts** - Safety event history
+- ✅ **Reports** - Export PDF/CSV reports
+- ✅ **History** - Previous monitoring sessions
+- ✅ **Settings** - Configure alerts and preferences
+- ✅ **Help** - User guide and documentation
 
-- **Chrome / Edge:** A permission popup appears in the address bar. Click **Allow**.
-- **Firefox:** A popup bar appears at the top. Click **Allow**.
-- **If denied:** Refresh the page, click the camera icon in the address bar, and change to **Allow**.
+### Backend (Flask API)
+- ✅ Real-time frame processing (~30 FPS)
+- ✅ Dual AI model inference (drowsiness + distraction)
+- ✅ RESTful API endpoints
+- ✅ CORS support for cross-origin requests
+- ✅ Session management and state tracking
 
-The camera feed is processed locally through the Flask server running on your machine. No video is sent to any external service.
+### AI Models
+- ✅ **Drowsiness Detection** (MobileNetV2)
+  - Eyes: Open/Closed
+  - Yawn: Yes/No
+  - Face detection with OpenCV Haar Cascade
+  
+- ✅ **Distraction Detection** (ResNet-18)
+  - 10 distraction behaviors from State Farm dataset
+  - Safe driving baseline recognition
 
 ---
 
-## API Endpoints
+## 📡 API Endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/` | Dashboard HTML |
-| `GET` | `/api/health` | System status + model metadata |
-| `POST` | `/api/predict` | Accept camera frame, return both predictions |
-| `POST` | `/api/reset` | Reset all counters and smoothing state |
+### Health Check
+```
+GET /api/health
+```
+Returns backend status and model information.
 
-### `/api/predict` — Request
-
-Send a JPEG frame as multipart form-data:
-
+### Prediction
 ```
 POST /api/predict
-Content-Type: multipart/form-data
-field: frame (JPEG file)
 ```
+Send camera frame, receive AI predictions.
 
-### `/api/predict` — Response
+**Request:** FormData with 'frame' field (JPEG)
 
+**Response:**
 ```json
 {
   "success": true,
   "safety_level": "SAFE",
   "safety_message": "Driver is Attentive & Alert",
   "alarm": false,
-  "inference_time_ms": 38.4,
-  "drowsiness": {
-    "prediction": "Open",
-    "raw_prediction": "Open",
-    "confidence": 96.4,
-    "status": "ALERT",
-    "is_drowsy": false,
-    "face_detected": true,
-    "drowsy_frame_count": 0,
-    "drowsy_elapsed_seconds": 0.0,
-    "probabilities": { "Closed": 0.01, "Open": 0.96, "no_yawn": 0.02, "yawn": 0.01 }
-  },
-  "distraction": {
-    "prediction": "Safe Driving",
-    "confidence": 91.2,
-    "status": "NOT DISTRACTED",
-    "is_distracted": false,
-    "top_classes": [
-      { "rank": 1, "class_name": "Safe Driving",   "confidence": 91.2 },
-      { "rank": 2, "class_name": "Operating Radio", "confidence": 4.1  },
-      { "rank": 3, "class_name": "Drinking",        "confidence": 2.3  }
-    ]
-  }
+  "inference_time_ms": 42.1,
+  "drowsiness": { ... },
+  "distraction": { ... }
 }
 ```
 
----
-
-## Alert System
-
-### Thresholds (configurable in `app.py`)
-
-```python
-DROWSINESS_THRESHOLD  = 0.40   # confidence below this → "Low Confidence"
-DISTRACTION_THRESHOLD = 0.45   # confidence below this → "Uncertain"
-DROWSY_FRAME_LIMIT    = 10     # consecutive drowsy frames before alarm
-DISTRACTED_FRAME_LIMIT= 10
-ALARM_SECONDS         = 2.0    # OR this many seconds of continuous detection
+### Reset Session
 ```
-
-### Temporal smoothing
-
-Both detectors use majority-vote smoothing over a rolling window of 5 frames. A single noisy frame will **not** trigger an alarm — the dominant prediction must persist.
-
+POST /api/reset
 ```
-Frame 1 → Drowsy
-Frame 2 → Drowsy
-Frame 3 → Non-Drowsy    ← noisy frame, overridden by majority
-Frame 4 → Drowsy
-Frame 5 → Drowsy
-                         → majority = Drowsy → alarm counter increments
-```
-
-### Safety levels
-
-| Level | Meaning |
-|---|---|
-| `SAFE` | Driver alert, no distraction |
-| `DROWSY` | Drowsiness confirmed |
-| `DISTRACTED` | Distraction confirmed |
-| `CRITICAL` | Both drowsy AND distracted simultaneously |
-| `NO_FACE` | Camera cannot detect driver's face |
+Resets all session counters and state.
 
 ---
 
-## Performance Notes
+## 🤖 Model Details
 
-- Both models are loaded **once** at startup. No reloading per frame.
-- PyTorch inference runs inside `torch.no_grad()`.
-- Frames are resized to 640 px wide before sending to save bandwidth.
-- `processingFrame` flag prevents parallel requests from the same client.
-- GPU is used automatically if available: `torch.device("cuda" if cuda else "cpu")`.
-- Typical CPU inference time: 30–80 ms per frame (both models combined).
+### Drowsiness Model
+- **Architecture:** MobileNetV2 (fine-tuned)
+- **Framework:** TensorFlow/Keras
+- **Input:** 224×224 RGB
+- **Classes:** 4 (Eyes Open, Eyes Closed, No Yawn, Yawn)
+- **Training:** Custom dataset with face detection
+
+### Distraction Model
+- **Architecture:** ResNet-18
+- **Framework:** PyTorch
+- **Input:** 224×224 RGB
+- **Classes:** 10 distraction behaviors
+- **Dataset:** State Farm Distracted Driver Detection
+
+**Distraction Classes:**
+1. Safe Driving
+2. Texting - Right Hand
+3. Phone Call - Right Hand
+4. Texting - Left Hand
+5. Phone Call - Left Hand
+6. Operating Radio
+7. Drinking
+8. Reaching Behind
+9. Hair / Makeup
+10. Talking to Passenger
 
 ---
 
-## Troubleshooting
+## 🎨 Design System
 
-| Symptom | Fix |
-|---|---|
-| `Drowsiness model not found` | Check `models/best_finetuned.keras` exists |
-| `Distraction model not found` | Check `models/driver_distraction_resnet18_complete.pth` exists |
-| `optree` import error | Add `optree==0.14.0` to requirements and reinstall |
-| Camera permission denied | Allow camera in browser; use `http://127.0.0.1:5000` (not `localhost`) |
-| Backend Offline in UI | Ensure `python app.py` is running and no other process uses port 5000 |
-| Very slow inference | Normal on CPU for first 1–2 frames; subsequent frames are faster |
-| Black camera in browser | Try a different browser; ensure no other app is using the webcam |
+### Color Palette
+- **Primary:** #F97316 (Orange) - Brand accent
+- **Secondary:** #172033 (Navy) - Text and contrast
+- **Background:** #F7F8FA (Light gray)
+- **Safe:** #16A34A (Green)
+- **Warning:** #F59E0B (Amber)
+- **Critical:** #DC2626 (Red)
+
+### Layout
+- Fixed left sidebar (260px, collapsible)
+- 8 page navigation system
+- Mobile responsive with drawer navigation
+- Premium card-based design
+
+---
+
+## 🛠️ Development
+
+### Backend Development
+```bash
+cd backend
+python app.py
+# Flask debug mode enabled by default in development
+```
+
+### Frontend Development
+```bash
+cd frontend
+npm run dev  # Hot reload enabled
+npm run lint # Run linter
+```
+
+### Building for Production
+
+**Frontend:**
+```bash
+cd frontend
+npm run build
+# Output: dist/ folder
+npm run preview  # Preview production build
+```
+
+**Backend:**
+Configure production WSGI server (Gunicorn, uWSGI, etc.)
+
+---
+
+## 📊 System Requirements
+
+### Minimum
+- **CPU:** Dual-core 2.0 GHz
+- **RAM:** 4 GB
+- **Storage:** 500 MB
+- **Camera:** 720p webcam
+
+### Recommended
+- **CPU:** Quad-core 3.0 GHz
+- **RAM:** 8 GB
+- **GPU:** CUDA-capable GPU (optional)
+- **Camera:** 1080p webcam
+
+---
+
+## 🔧 Troubleshooting
+
+### Backend Issues
+
+**Models not found:**
+```
+[FATAL] Drowsiness model not found
+```
+✅ Solution: Verify files exist in `models/` directory
+
+**Port already in use:**
+```
+OSError: Address already in use
+```
+✅ Solution: Change port in `backend/app.py` or kill process on port 5000
+
+### Frontend Issues
+
+**Dependencies installation fails:**
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**API connection errors:**
+✅ Solution: Ensure backend is running at `http://localhost:5000`
+
+### Camera Issues
+
+**Camera access denied:**
+✅ Solution: Allow camera permissions in browser settings
+
+**No camera detected:**
+✅ Solution: Ensure webcam is connected and not used by another application
+
+---
+
+## 📚 Documentation
+
+Detailed documentation for each component:
+
+- **Backend:** See `backend/README.md`
+- **Frontend:** See `frontend/README.md`
+- **Models:** See `models/README.md`
+
+---
+
+## 🧪 Testing
+
+### Manual Testing Checklist
+- [ ] Backend starts without errors
+- [ ] Frontend connects to backend
+- [ ] Camera access granted
+- [ ] Live detection working (eyes, yawn, distraction)
+- [ ] Safety score updates in real-time
+- [ ] Alerts appear correctly
+- [ ] Navigation between pages works
+- [ ] Export reports (PDF/CSV)
+- [ ] Settings persist
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Areas for improvement:
+- Additional distraction classes
+- GPU acceleration optimization
+- Mobile app version
+- Cloud deployment guides
+- Multi-camera support
+- Advanced analytics
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 🙏 Acknowledgments
+
+- **State Farm Distracted Driver Dataset** for distraction model training
+- **MobileNetV2** architecture for efficient drowsiness detection
+- **React** and **Flask** communities
+
+---
+
+## 📞 Support
+
+For issues and questions:
+1. Check the documentation in each folder's README
+2. Review troubleshooting section
+3. Verify all dependencies are installed
+4. Check browser console for frontend errors
+5. Check terminal for backend errors
+
+---
+
+## 🎉 Ready to Go!
+
+Run the commands above and access:
+### **http://localhost:5173**
+
+**Stay Safe on the Road with DriverGuard!** 🚗💨
