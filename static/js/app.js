@@ -1414,21 +1414,26 @@ function setVideoStatus(text, cls) {
 }
 
 function setBadge(elem, text, cls) {
+  if (!elem) return;
   elem.textContent = text;
   elem.className   = `detection-badge ${cls}`;
 }
 
 function setBar(elem, pct, className) {
+  if (!elem) return;
   elem.style.width = `${clamp(pct, 0, 100)}%`;
-  elem.className   = className;
+  if (className) elem.className = className;
 }
 
 function setProbRow(valId, barId, prob, isDrowsy) {
   const pct = clamp(Number(prob ?? 0) * 100, 0, 100);
-  $(valId).textContent = `${pct.toFixed(1)}%`;
+  const val = $(valId);
+  if (val) val.textContent = `${pct.toFixed(1)}%`;
   const bar = $(barId);
-  bar.style.width = `${pct}%`;
-  bar.className   = `prog-fill ${isDrowsy ? "drowsy-fill" : "alert-fill"}`;
+  if (bar) {
+    bar.style.width = `${pct}%`;
+    bar.className   = `prog-fill ${isDrowsy ? "drowsy-fill" : "alert-fill"}`;
+  }
 }
 
 function formatDrowsinessLabel(raw) {
