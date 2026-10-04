@@ -327,9 +327,8 @@ class DrowsinessDetector:
                         if all(str(k).isdigit() for k in data):
                             return [str(data[str(i)]).strip() for i in range(len(data))]
                         return [str(v).strip() for v in data.values()]
-                except Exception as exc:
-                    print(f"[Drowsiness] Could not parse class_names.json: {exc}")
-        print(f"[Drowsiness] Using default class names: {DEFAULT_CLASS_NAMES}")
+                except Exception:
+                    pass
         return list(DEFAULT_CLASS_NAMES)
 
     def _detect_face(self, pil_image: Image.Image) -> tuple[Image.Image | None, np.ndarray | None, bool]:
