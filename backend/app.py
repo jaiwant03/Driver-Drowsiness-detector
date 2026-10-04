@@ -97,15 +97,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 # ---------------------------------------------------------------------------
 # Load both models once at startup
 # ---------------------------------------------------------------------------
-print()
-print("=" * 70)
-print("  DRIVER MONITORING SYSTEM  --  Starting up")
-print("=" * 70)
-print(f"  Project root       : {PROJECT_ROOT}")
-print(f"  Backend root       : {ROOT}")
-print(f"  Drowsiness model   : {DROWSINESS_MODEL}")
-print(f"  Distraction model  : {DISTRACTION_MODEL}")
-print()
+print("Loading models...")
 
 try:
     drowsiness_detector = DrowsinessDetector(
@@ -116,9 +108,8 @@ try:
         drowsy_frame_limit=DROWSY_FRAME_LIMIT,
         alarm_time_seconds=ALARM_SECONDS,
     )
-    print("[OK] Drowsiness detector ready.")
 except Exception as exc:
-    print(f"[FATAL] Could not load drowsiness model: {exc}")
+    print(f"Could not load drowsiness model: {exc}")
     traceback.print_exc()
     sys.exit(1)
 
@@ -130,17 +121,12 @@ try:
         distracted_frame_limit=DISTRACTED_FRAME_LIMIT,
         alarm_time_seconds=ALARM_SECONDS,
     )
-    print("[OK] Distraction detector ready.")
 except Exception as exc:
-    print(f"[FATAL] Could not load distraction model: {exc}")
+    print(f"Could not load distraction model: {exc}")
     traceback.print_exc()
     sys.exit(1)
 
-print()
-print("=" * 70)
-print("  BOTH MODELS LOADED SUCCESSFULLY")
-print("=" * 70)
-print()
+print("Both models loaded successfully")
 
 
 # ---------------------------------------------------------------------------
@@ -337,9 +323,7 @@ if __name__ == "__main__":
     host = os.getenv("HOST", "127.0.0.1")
     port = int(os.getenv("PORT", "5000"))
 
-    print("=" * 70)
-    print("  Backend running successfully")
-    print("=" * 70)
+    print("Backend running successfully")
     print()
 
     app.run(host=host, port=port, debug=False, threaded=True, use_reloader=False)
