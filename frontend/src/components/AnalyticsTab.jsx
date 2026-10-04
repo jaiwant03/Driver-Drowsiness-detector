@@ -1,7 +1,7 @@
 import React from "react";
 
 // Subtle corner decorative wave matching the dashboard cards
-function CornerWave({ color = "#007C83", opacity = 0.10 }) {
+function CornerWave({ color = "#007C83", opacity = 0.12 }) {
   return (
     <svg
       className="db-card-corner-wave"
@@ -50,16 +50,16 @@ export function AnalyticsTab({
   const pYawn = total > 0 ? ((countsSafe.yawns || 0) / total) * C : 0;
   const pDist = total > 0 ? ((countsSafe.distractions || 0) / total) * C : 0;
 
-  // Trend line coordinates calculation
+  // Trend line coordinates calculation with larger height (130px)
   const pts = scoreHistory && scoreHistory.length >= 2 ? scoreHistory : [100, 100];
   const w = 420;
-  const h = 94;
+  const h = 130;
   const dx = w / (pts.length - 1);
 
-  let pathD = `M 0 ${Math.round(h - (pts[0] / 100) * (h - 22) - 10)}`;
+  let pathD = `M 0 ${Math.round(h - (pts[0] / 100) * (h - 26) - 12)}`;
   for (let i = 1; i < pts.length; i++) {
     const x = Math.round(i * dx);
-    const y = Math.round(h - (pts[i] / 100) * (h - 22) - 10);
+    const y = Math.round(h - (pts[i] / 100) * (h - 26) - 12);
     pathD += ` L ${x} ${y}`;
   }
   const areaD = `${pathD} L ${w} ${h} L 0 ${h} Z`;
@@ -70,18 +70,18 @@ export function AnalyticsTab({
   return (
     <div className="ap-page">
 
-      {/* ── Page Header ────────────────────────────────────────── */}
+      {/* ── Page Header with Multi-Color Analytics Title ──────── */}
       <div className="ap-page-header">
         <div className="ap-header-left">
           <div className="ap-header-icon-badge" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="20" x2="18" y2="10" />
               <line x1="12" y1="20" x2="12" y2="4" />
               <line x1="6"  y1="20" x2="6"  y2="14" />
             </svg>
           </div>
           <div>
-            <h1 className="ap-title">Analytics</h1>
+            <h1 className="ap-title ap-title-multicolor">Analytics</h1>
             <p className="ap-subtitle">Session statistics and trends</p>
           </div>
         </div>
@@ -93,12 +93,12 @@ export function AnalyticsTab({
         </div>
       </div>
 
-      {/* ── Analytics Intro Card ───────────────────────────────── */}
+      {/* ── Analytics Intro Card (Larger & Spacious) ───────────── */}
       <div className="ap-intro-card">
         <div className="ap-intro-left-indicator" />
         <div className="ap-intro-content">
           <div className="ap-intro-icon-circle" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="12" width="4" height="8" rx="1" fill="#00A6A6" />
               <rect x="10" y="8" width="4" height="12" rx="1" fill="#007C83" />
               <rect x="17" y="4" width="4" height="16" rx="1" fill="#005F63" />
@@ -125,13 +125,13 @@ export function AnalyticsTab({
         </div>
       </div>
 
-      {/* ── 4 KPI Cards Grid ──────────────────────────────────── */}
+      {/* ── 4 KPI Cards Grid (Larger & Bolder) ────────────────── */}
       <div className="ap-kpi-grid">
         {/* Card 1: FRAMES ANALYSED */}
         <div className="ap-kpi-card">
           <div className="ap-kpi-header">
             <div className="ap-kpi-icon ap-icon-peacock" aria-hidden="true">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
                 <circle cx="12" cy="13" r="3"/>
               </svg>
@@ -147,7 +147,7 @@ export function AnalyticsTab({
         <div className="ap-kpi-card">
           <div className="ap-kpi-header">
             <div className="ap-kpi-icon ap-icon-red" aria-hidden="true">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
@@ -163,7 +163,7 @@ export function AnalyticsTab({
         <div className="ap-kpi-card">
           <div className="ap-kpi-header">
             <div className="ap-kpi-icon ap-icon-orange" aria-hidden="true">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
                 <line x1="9" y1="9" x2="9.01" y2="9"/>
@@ -181,7 +181,7 @@ export function AnalyticsTab({
         <div className="ap-kpi-card">
           <div className="ap-kpi-header">
             <div className="ap-kpi-icon ap-icon-teal" aria-hidden="true">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -198,12 +198,12 @@ export function AnalyticsTab({
       {/* ── Middle Row: Detection Distribution + Safety Trend ─── */}
       <div className="ap-mid-grid">
 
-        {/* Card: Detection Distribution */}
+        {/* Card: Detection Distribution (Bigger & Spacious) */}
         <div className="ap-card">
           <div className="ap-card-header">
             <h2 className="ap-card-title">
               <span className="ap-card-title-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M21 12A9 9 0 0 0 12 3v9h9z" />
                   <path d="M10.5 3.08A9 9 0 1 0 20.92 13.5H10.5V3.08z" opacity="0.6" />
                 </svg>
@@ -292,7 +292,7 @@ export function AnalyticsTab({
                   <text x="50" y="47" textAnchor="middle" className="ap-donut-center-num">
                     {total}
                   </text>
-                  <text x="50" y="60" textAnchor="middle" className="ap-donut-center-lbl">
+                  <text x="50" y="61" textAnchor="middle" className="ap-donut-center-lbl">
                     Total
                   </text>
                 </g>
@@ -336,12 +336,12 @@ export function AnalyticsTab({
           </div>
         </div>
 
-        {/* Card: Driver Safety Trend */}
+        {/* Card: Driver Safety Trend (Bigger & Taller Canvas) */}
         <div className="ap-card">
           <div className="ap-card-header">
             <h2 className="ap-card-title">
               <span className="ap-card-title-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                   <polyline points="17 6 23 6 23 12" />
                 </svg>
@@ -358,27 +358,27 @@ export function AnalyticsTab({
           <div className="ap-trend-svg-wrap">
             <svg
               className="ap-trend-svg"
-              viewBox="0 0 420 94"
+              viewBox="0 0 420 130"
               preserveAspectRatio="none"
             >
               <defs>
                 <linearGradient id="apTrendGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#007C83" stopOpacity="0.25" />
+                  <stop offset="0%" stopColor="#007C83" stopOpacity="0.28" />
                   <stop offset="100%" stopColor="#00A6A6" stopOpacity="0.01" />
                 </linearGradient>
               </defs>
 
               {/* Grid Lines */}
-              <line x1="0" y1="18" x2="420" y2="18" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="3 3" />
-              <line x1="0" y1="42" x2="420" y2="42" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="3 3" />
-              <line x1="0" y1="66" x2="420" y2="66" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="0" y1="25" x2="420" y2="25" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
+              <line x1="0" y1="60" x2="420" y2="60" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
+              <line x1="0" y1="95" x2="420" y2="95" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
 
               {/* Area & Line */}
               <path d={areaD} fill="url(#apTrendGrad)" />
               <path
                 d={pathD}
                 stroke="#007C83"
-                strokeWidth="2.6"
+                strokeWidth="2.8"
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -394,19 +394,19 @@ export function AnalyticsTab({
         </div>
       </div>
 
-      {/* ── Session Event Timeline ─────────────────────────────── */}
+      {/* ── Session Event Timeline (Bigger Rail) ────────────────── */}
       <div className="ap-timeline-card">
         <div className="ap-timeline-header">
           <h2 className="ap-timeline-title">
             <span style={{ color: "#007C83" }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
             </span>
             SESSION EVENT TIMELINE
           </h2>
-          <span className="ap-telemetry-tag" style={{ padding: "3px 10px", fontSize: "11px" }}>
+          <span className="ap-telemetry-tag" style={{ padding: "5px 12px", fontSize: "11.5px" }}>
             <span className="ap-pulse-dot" />
             Live Stream
           </span>
@@ -414,7 +414,7 @@ export function AnalyticsTab({
 
         <div className="ap-timeline-rail-wrap">
           <div className="ap-timeline-events-pill">
-            <span className="ap-pulse-dot" style={{ width: "5px", height: "5px" }} />
+            <span className="ap-pulse-dot" style={{ width: "6px", height: "6px" }} />
             EVENTS
           </div>
 
@@ -447,7 +447,7 @@ export function AnalyticsTab({
           <div className="ap-card-header">
             <h2 className="ap-card-title">
               <span className="ap-card-title-icon" aria-hidden="true">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
@@ -488,7 +488,7 @@ export function AnalyticsTab({
           <div className="ap-card-header">
             <h2 className="ap-card-title">
               <span className="ap-card-title-icon" aria-hidden="true">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                   <line x1="12" y1="9" x2="12" y2="13"/>
                   <line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -520,7 +520,7 @@ export function AnalyticsTab({
             ) : (
               <div className="ap-empty-state">
                 <div className="ap-empty-icon" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
                     <circle cx="12" cy="13" r="3"/>
                   </svg>

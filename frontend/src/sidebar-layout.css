@@ -43,7 +43,6 @@
   display: flex;
   min-height: 100vh;
   background: var(--bg-page);
-  overflow: hidden;
   font-family: "Outfit", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
 }
 
