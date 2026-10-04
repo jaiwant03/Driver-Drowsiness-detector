@@ -1062,6 +1062,15 @@
   margin: 0;
 }
 
+.db-hero-brand-multi {
+  background: linear-gradient(135deg, #00C4DF 0%, #10B981 40%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
 .db-hero-scenic {
   position: absolute;
   right: -5px;
