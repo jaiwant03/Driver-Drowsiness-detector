@@ -323,10 +323,19 @@ def reset():
 # Entry point
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
+    import logging
+
+    # Silence Flask/Werkzeug's default "* Running on ..." and request logs
+    log = logging.getLogger("werkzeug")
+    log.setLevel(logging.ERROR)
+
     host = os.getenv("HOST", "127.0.0.1")
     port = int(os.getenv("PORT", "5000"))
-    print(f"  API only   ->  http://{host}:{port}/api/health")
-    print(f"  Health API ->  http://{host}:{port}/api/health")
-    print(f"  Frontend   ->  run 'npm run dev' in the frontend/ folder")
+
+    print("=" * 70)
+    print("  Backend running successfully")
+    print("  Open the frontend at http://localhost:5173")
+    print("=" * 70)
     print()
-    app.run(host=host, port=port, debug=False, threaded=True)
+
+    app.run(host=host, port=port, debug=False, threaded=True, use_reloader=False)
