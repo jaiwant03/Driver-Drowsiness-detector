@@ -44,7 +44,7 @@
   min-height: 100vh;
   background: var(--bg-page);
   overflow: hidden;
-  font-family: "Inter", "Plus Jakarta Sans", system-ui, sans-serif;
+  font-family: "Outfit", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
