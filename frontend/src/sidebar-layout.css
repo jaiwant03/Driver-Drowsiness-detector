@@ -549,9 +549,9 @@
 .toggle-switch.active .toggle-slider { transform:translateX(22px); }
 
 .volume-control { display:flex; align-items:center; gap:12px; margin-top:12px; }
-.volume-slider { flex:1; height:6px; border-radius:999px; background:var(--slate-border); outline:none; -webkit-appearance:none; }
+.volume-slider { flex:1; height:6px; border-radius:999px; background:var(--slate-border); outline:none; -webkit-appearance:none; appearance:none; }
 .volume-slider::-webkit-slider-thumb {
-  -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+  -webkit-appearance:none; appearance:none; width:18px; height:18px; border-radius:50%;
   background:var(--orange-primary); cursor:pointer;
 }
 .volume-value { font-size:14px; font-weight:700; color:var(--navy-dark); min-width:42px; text-align:right; }
