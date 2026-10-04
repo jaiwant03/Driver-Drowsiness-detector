@@ -1,15 +1,23 @@
 "use strict";
 
 /**
- * DriverGuard — Dual-Model Driver Monitoring
- * ==========================================
+ * DriverGuard — Dual-Model Driver Safety Command Center
+ * =====================================================
  * Single camera → two independent deep-learning models:
  *   1. Drowsiness  (MobileNetV2 / Keras)
  *   2. Distraction (ResNet-18  / PyTorch)
  *
- * Frame pipeline:
- *   webcam → canvas capture → JPEG blob → POST /api/predict
- *   ← JSON { drowsiness: {...}, distraction: {...}, safety_level, alarm }
+ * Command-Center Telemetry Features:
+ *   - Driver Safety Score (0-100 ring gauge)
+ *   - Current Status indicators (Eyes, Yawn, Distraction)
+ *   - Session Timer (HH:MM:SS)
+ *   - Horizontal Live Detection Timeline
+ *   - Detection Distribution Donut & Trend Sparkline
+ *   - Recent Alert History & Event Log
+ *   - Voice Alerts (Web Speech API with cooldown)
+ *   - Focus Mode & Fullscreen Camera
+ *   - Event Snapshot Capture & Gallery
+ *   - Session Report Modal, CSV Export, and PDF Print
  */
 
 /* =========================================================
@@ -25,9 +33,10 @@ const DEFAULT_API_URL = (() => {
 const CONFIG = {
   apiUrl:            window.__APP_API_URL__ || DEFAULT_API_URL,
   captureIntervalMs: 1000 / 30,
-  captureQuality:    0.75,  // JPEG quality [0-1]
-  captureWidthPx:    640,   // resize before sending — saves bandwidth
-  healthPollMs:      4000,  // backend health-check interval
+  captureQuality:    0.75,
+  captureWidthPx:    640,
+  healthPollMs:      4000,
+  voiceCooldownMs:   8000,
 };
 
 /* =========================================================
@@ -36,17 +45,24 @@ const CONFIG = {
 const $ = id => document.getElementById(id);
 
 const el = {
-  /* Header */
+  /* Header & Telemetry */
   statusDot:         $("statusDot"),
   statusText:        $("statusText"),
   fpsBadge:          $("fpsBadge"),
+  fpsValue:          $("fpsValue"),
+  btnVoiceToggle:    $("btnVoiceToggle"),
+  voiceText:         $("voiceText"),
+  btnFocusMode:      $("btnFocusMode"),
+  btnExitFocus:      $("btnExitFocus"),
+  btnOpenSettings:   $("btnOpenSettings"),
 
-  /* Alert banner */
+  /* Alert Banner */
   alertBanner:       $("alertBanner"),
   alertBannerText:   $("alertBannerText"),
   alertBannerClose:  $("alertBannerClose"),
+  alertStripBadge:   $("alertStripBadge"),
 
-  /* Camera */
+  /* Camera Card */
   cameraFeed:        $("cameraFeed"),
   captureCanvas:     $("captureCanvas"),
   videoWrap:         $("videoWrap"),
@@ -55,13 +71,30 @@ const el = {
   cameraPlaceholder: $("cameraPlaceholder"),
   safetyBadge:       $("safetyBadge"),
   inferenceTime:     $("inferenceTime"),
+  camFaceTag:        $("camFaceTag"),
+  camLatencyTag:     $("camLatencyTag"),
+  footCamStatus:     $("footCamStatus"),
 
-  /* Buttons */
+  /* Action Buttons */
   btnStart:          $("btnStart"),
   btnStop:           $("btnStop"),
   btnReset:          $("btnReset"),
+  btnFullscreen:     $("btnFullscreen"),
+  btnCaptureSnapshot:$("btnCaptureSnapshot"),
+  sessionTimer:      $("sessionTimer"),
 
-  /* Drowsiness panel */
+  /* Driver Safety Score */
+  scoreRingFill:     $("scoreRingFill"),
+  scoreValue:        $("scoreValue"),
+  scoreLabel:        $("scoreLabel"),
+  statusEyesText:    $("statusEyesText"),
+  statusYawnText:    $("statusYawnText"),
+  statusDistractText:$("statusDistractText"),
+  pillEyes:          $("pillEyes"),
+  pillYawn:          $("pillYawn"),
+  pillDistract:      $("pillDistract"),
+
+  /* Drowsiness Panel */
   drowsinessPanel:   $("drowsinessPanel"),
   drowsinessBadge:   $("drowsinessBadge"),
   drowsinessIcon:    $("drowsinessIcon"),
@@ -77,7 +110,7 @@ const el = {
   drowsyFrames:      $("drowsyFrames"),
   faceDetected:      $("faceDetected"),
 
-  /* Distraction panel */
+  /* Distraction Panel */
   distractionPanel:  $("distractionPanel"),
   distractionBadge:  $("distractionBadge"),
   distractionIcon:   $("distractionIcon"),
@@ -91,18 +124,85 @@ const el = {
   distractDuration:  $("distractDuration"),
   distractFrames:    $("distractFrames"),
 
-  /* Stats bar */
+  /* Session Overview & Stats */
   statFrames:        $("statFrames"),
   statDrowsyEvents:  $("statDrowsyEvents"),
+  statYawnEvents:    $("statYawnEvents"),
   statDistractEvents:$("statDistractEvents"),
+  statAvgConfidence: $("statAvgConfidence"),
   statSafety:        $("statSafety"),
   statModels:        $("statModels"),
+  safetyIndicatorDot:$("safetyIndicatorDot"),
 
-  /* Alarm modal */
+  /* Donut & Trend Charts */
+  donutEyesOpen:     $("donutEyesOpen"),
+  donutEyesClosed:   $("donutEyesClosed"),
+  donutYawn:         $("donutYawn"),
+  donutDistract:     $("donutDistract"),
+  cntEyesOpen:       $("cntEyesOpen"),
+  cntEyesClosed:     $("cntEyesClosed"),
+  cntYawns:          $("cntYawns"),
+  cntDistractions:   $("cntDistractions"),
+  trendLine:         $("trendLine"),
+  trendArea:         $("trendArea"),
+  trendCurrentScoreTag: $("trendCurrentScoreTag"),
+
+  /* Horizontal Timeline Rail */
+  timelineRail:      $("timelineRail"),
+
+  /* Alert History */
+  alertHistoryList:  $("alertHistoryList"),
+  historyEmptyState: $("historyEmptyState"),
+  btnViewAllAlerts:  $("btnViewAllAlerts"),
+  alertTabCount:     $("alertTabCount"),
+  fullAlertsTbody:   $("fullAlertsTbody"),
+  btnClearAlertHistory: $("btnClearAlertHistory"),
+
+  /* Alarm Modal */
   alarmBackdrop:     $("alarmBackdrop"),
   alarmTitle:        $("alarmTitle"),
   alarmBody:         $("alarmBody"),
   btnDismissAlarm:   $("btnDismissAlarm"),
+
+  /* Settings Modal */
+  settingsModal:     $("settingsModal"),
+  btnCloseSettings:  $("btnCloseSettings"),
+  btnSaveSettings:   $("btnSaveSettings"),
+  setVoiceToggle:    $("setVoiceToggle"),
+  setVisualToggle:   $("setVisualToggle"),
+  setCriticalToggle: $("setCriticalToggle"),
+  setVolumeSlider:   $("setVolumeSlider"),
+  setVolumeVal:      $("setVolumeVal"),
+
+  /* Gallery Modal */
+  galleryModal:      $("galleryModal"),
+  galleryGrid:       $("galleryGrid"),
+  galleryCount:      $("galleryCount"),
+  btnCloseGallery:   $("btnCloseGallery"),
+  btnCloseGalleryBtn:$("btnCloseGalleryBtn"),
+  btnClearGallery:   $("btnClearGallery"),
+
+  /* Session Complete Modal & Report */
+  sessionCompleteModal: $("sessionCompleteModal"),
+  btnCloseSessionModal: $("btnCloseSessionModal"),
+  completeScoreCircle:  $("completeScoreCircle"),
+  completeScoreHeading: $("completeScoreHeading"),
+  compTime:             $("compTime"),
+  compFrames:           $("compFrames"),
+  compDrowsy:           $("compDrowsy"),
+  compYawns:            $("compYawns"),
+  compDistract:         $("compDistract"),
+  btnModalExportCSV:    $("btnModalExportCSV"),
+  btnModalViewReport:   $("btnModalViewReport"),
+  btnExportCSV:         $("btnExportCSV"),
+  btnExportPDF:         $("btnExportPDF"),
+  reportDate:           $("reportDate"),
+  repTime:              $("repTime"),
+  repFrames:            $("repFrames"),
+  repScore:             $("repScore"),
+  repDrowsy:            $("repDrowsy"),
+  repYawns:             $("repYawns"),
+  repDistract:          $("repDistract"),
 };
 
 /* =========================================================
@@ -113,19 +213,50 @@ let state = {
   stream:          null,
   captureTimer:    null,
   healthTimer:     null,
+  sessionClockTimer: null,
+  sessionSeconds:  0,
   processingFrame: false,
   backendOnline:   false,
   alarmShown:      false,
 
-  /* FPS tracking */
-  frameCount:    0,
-  fpsLastTs:     performance.now(),
-  currentFps:    0,
+  /* Safety Scoring */
+  currentScore:    100,
+  scoreHistory:    [100, 100, 100, 100, 100],
 
-  /* Max session stats (cumulative from backend) */
-  maxFrames:        0,
-  maxDrowsyEvents:  0,
-  maxDistractEvents:0,
+  /* FPS tracking */
+  frameCount:      0,
+  fpsLastTs:       performance.now(),
+  currentFps:      0,
+
+  /* Cumulative Metrics */
+  maxFrames:          0,
+  maxDrowsyEvents:    0,
+  maxYawnEvents:      0,
+  maxDistractEvents:  0,
+  confidenceSum:      0,
+  confidenceCount:    0,
+
+  /* Category Counts for Donut Chart */
+  counts: {
+    eyesOpen:     0,
+    eyesClosed:   0,
+    yawns:        0,
+    distractions: 0,
+  },
+
+  /* Alert Log & History */
+  alertHistory:    [],
+  timelineEvents:  [],
+  snapshots:       [],
+
+  /* Voice Synthesizer */
+  lastVoiceTs:     0,
+  settings: {
+    voiceEnabled:    true,
+    visualEnabled:   true,
+    criticalEnabled: true,
+    volume:          0.8,
+  },
 };
 
 /* =========================================================
@@ -135,26 +266,86 @@ document.addEventListener("DOMContentLoaded", () => {
   resetUI();
   attachEventListeners();
   startHealthPoller();
-  checkBackend();          // immediate first check
+  checkBackend();
+  initSettings();
 });
 
 /* =========================================================
    EVENT LISTENERS
 ========================================================= */
 function attachEventListeners() {
+  /* Camera Controls */
   el.btnStart.addEventListener("click", startCamera);
   el.btnStop.addEventListener("click", stopCamera);
   el.btnReset.addEventListener("click", resetSession);
+  el.btnFullscreen.addEventListener("click", toggleFullscreen);
+  el.btnCaptureSnapshot.addEventListener("click", captureSnapshot);
+
+  /* Tab Navigation */
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+  });
+
+  /* Focus Mode */
+  el.btnFocusMode.addEventListener("click", enterFocusMode);
+  el.btnExitFocus.addEventListener("click", exitFocusMode);
+
+  /* Voice Alert Header Toggle */
+  el.btnVoiceToggle.addEventListener("click", toggleVoiceAlert);
+
+  /* Modals */
+  el.btnOpenSettings.addEventListener("click", openSettings);
+  el.btnCloseSettings.addEventListener("click", closeSettings);
+  el.btnSaveSettings.addEventListener("click", closeSettings);
+
+  el.btnViewAllAlerts.addEventListener("click", () => switchTab("alerts"));
+  el.btnClearAlertHistory.addEventListener("click", clearAlertHistory);
+
   el.btnDismissAlarm.addEventListener("click", hideAlarm);
   el.alertBannerClose.addEventListener("click", hideBanner);
 
-  /* Dismiss alarm on backdrop click */
-  el.alarmBackdrop.addEventListener("click", e => {
-    if (e.target === el.alarmBackdrop) hideAlarm();
+  el.btnCloseGallery.addEventListener("click", () => el.galleryModal.hidden = true);
+  el.btnCloseGalleryBtn.addEventListener("click", () => el.galleryModal.hidden = true);
+  el.btnClearGallery.addEventListener("click", clearGallery);
+
+  el.btnCloseSessionModal.addEventListener("click", () => el.sessionCompleteModal.hidden = true);
+  el.btnModalViewReport.addEventListener("click", () => {
+    el.sessionCompleteModal.hidden = true;
+    switchTab("report");
   });
 
-  /* Stop monitoring when page closes */
+  /* Exports */
+  el.btnExportCSV.addEventListener("click", exportSessionCSV);
+  el.btnModalExportCSV.addEventListener("click", exportSessionCSV);
+  el.btnExportPDF.addEventListener("click", exportSessionPDF);
+
+  /* Modal Backdrop dismissal */
+  [el.settingsModal, el.galleryModal, el.sessionCompleteModal, el.alarmBackdrop].forEach(modal => {
+    modal.addEventListener("click", e => {
+      if (e.target === modal) modal.hidden = true;
+    });
+  });
+
   window.addEventListener("beforeunload", stopCamera);
+}
+
+/* =========================================================
+   TAB NAVIGATION SYSTEM
+========================================================= */
+function switchTab(tabName) {
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    const isTarget = tab.dataset.tab === tabName;
+    tab.classList.toggle("active", isTarget);
+    tab.setAttribute("aria-selected", isTarget ? "true" : "false");
+  });
+
+  document.querySelectorAll(".tab-page").forEach(page => {
+    const pageId = "tab" + tabName.charAt(0).toUpperCase() + tabName.slice(1);
+    page.classList.toggle("active", page.id === pageId);
+  });
+
+  if (tabName === "report") updateReportDocument();
+  if (tabName === "analytics") updateAnalyticsTab();
 }
 
 /* =========================================================
@@ -171,11 +362,10 @@ async function checkBackend() {
     const data = await res.json();
     setBackendOnline(true);
 
-    /* Update models status in stats bar */
     if (data.models) {
-      const nd = data.models.drowsiness?.num_classes ?? "?";
-      const ni = data.models.distraction?.num_classes ?? "?";
-      el.statModels.textContent = `${nd}+${ni} classes`;
+      const nd = data.models.drowsiness?.num_classes ?? 4;
+      const ni = data.models.distraction?.num_classes ?? 10;
+      el.statModels.textContent = `${nd} + ${ni}`;
     }
   } catch {
     setBackendOnline(false);
@@ -189,7 +379,7 @@ function setBackendOnline(online) {
 }
 
 /* =========================================================
-   CAMERA — START / STOP
+   CAMERA — START / STOP / CAPTURE LOOP
 ========================================================= */
 async function startCamera() {
   if (state.monitoring) return;
@@ -213,19 +403,19 @@ async function startCamera() {
     el.videoWrap.classList.add("active");
     el.btnStart.disabled = true;
     el.btnStop.disabled  = false;
+    el.footCamStatus.innerHTML = `<span class="dot-live"></span> Camera Active`;
 
     setSafetyBadge("MONITORING", "badge-muted");
     setVideoStatus("MONITORING", "");
-
+    startSessionTimer();
     startCaptureLoop();
+
+    addTimelineEvent("MONITORING ACTIVE", "chip-safe");
     console.log("[DriverGuard] Camera started.");
 
   } catch (err) {
-    console.error("[DriverGuard] Camera error:", err);
-    const msg = err.name === "NotAllowedError"
-      ? "Camera access was denied.\nPlease allow camera permission in your browser and try again."
-      : `Unable to access the camera:\n${err.message}`;
-    alert(msg);
+    console.error("[DriverGuard] Camera access error:", err);
+    alert("Camera access denied or unavailable:\n" + err.message);
   }
 }
 
@@ -234,6 +424,7 @@ function stopCamera() {
 
   state.monitoring = false;
   stopCaptureLoop();
+  stopSessionTimer();
 
   if (state.stream) {
     state.stream.getTracks().forEach(t => t.stop());
@@ -242,19 +433,18 @@ function stopCamera() {
 
   el.cameraFeed.srcObject = null;
   el.cameraPlaceholder.classList.remove("hidden");
-  el.videoWrap.className = "video-wrap";   // remove all state classes
-
+  el.videoWrap.className = "video-wrap";
   el.btnStart.disabled = false;
   el.btnStop.disabled  = true;
+  el.footCamStatus.innerHTML = `<span class="dot-off"></span> Camera Standby`;
 
   setSafetyBadge("STOPPED", "badge-muted");
   setVideoStatus("STOPPED", "");
-  console.log("[DriverGuard] Camera stopped.");
+
+  addTimelineEvent("SESSION PAUSED", "chip-warn");
+  openSessionCompleteModal();
 }
 
-/* =========================================================
-   CAPTURE LOOP
-========================================================= */
 function startCaptureLoop() {
   stopCaptureLoop();
   state.captureTimer = setInterval(captureAndSend, CONFIG.captureIntervalMs);
@@ -268,14 +458,12 @@ function stopCaptureLoop() {
 }
 
 async function captureAndSend() {
-  if (!state.monitoring) return;
-  if (state.processingFrame) return;                    // drop frame if still busy
+  if (!state.monitoring || state.processingFrame) return;
   if (!el.cameraFeed.videoWidth || !el.cameraFeed.videoHeight) return;
 
   state.processingFrame = true;
 
   try {
-    /* ── Capture frame ── */
     const ctx    = el.captureCanvas.getContext("2d");
     const aspect = el.cameraFeed.videoHeight / el.cameraFeed.videoWidth;
     const w      = CONFIG.captureWidthPx;
@@ -283,8 +471,6 @@ async function captureAndSend() {
 
     el.captureCanvas.width  = w;
     el.captureCanvas.height = h;
-
-    /* Draw un-mirrored (CSS mirror is cosmetic only; model sees the real frame) */
     ctx.drawImage(el.cameraFeed, 0, 0, w, h);
 
     const blob = await new Promise(res =>
@@ -292,183 +478,244 @@ async function captureAndSend() {
     );
     if (!blob) return;
 
-    /* ── Send to backend ── */
     const form = new FormData();
     form.append("frame", blob, "frame.jpg");
 
-    const res  = await fetch(`${CONFIG.apiUrl}/api/predict`, {
+    const res = await fetch(`${CONFIG.apiUrl}/api/predict`, {
       method: "POST",
       body:   form,
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-
-    if (!data.success) throw new Error(data.error || "Prediction failed");
+    if (!data.success) throw new Error(data.error || "Inference failed");
 
     setBackendOnline(true);
     updateUI(data);
     trackFps();
 
   } catch (err) {
-    console.error("[DriverGuard] Frame error:", err);
-    setBackendOnline(false);
+    console.error("[DriverGuard] Pipeline error:", err);
   } finally {
     state.processingFrame = false;
   }
 }
 
 /* =========================================================
-   UPDATE UI FROM API RESPONSE
+   DYNAMIC UPDATE UI FROM MODEL PREDICTIONS
 ========================================================= */
 function updateUI(data) {
-  const { drowsiness, distraction, safety_level, safety_message,
-          alarm, inference_time_ms } = data;
+  const { drowsiness, distraction, safety_level, safety_message, alarm, inference_time_ms } = data;
 
-  /* ── Inference time ── */
-  el.inferenceTime.textContent = `${inference_time_ms ?? "—"} ms`;
+  /* Latency */
+  const latStr = `${inference_time_ms ?? "—"} ms`;
+  el.inferenceTime.textContent = latStr;
+  el.camLatencyTag.textContent = latStr;
 
-  /* ── Overall safety ── */
-  updateSafetyLevel(safety_level, safety_message);
-
-  /* ── Drowsiness panel ── */
+  /* Drowsiness & Distraction Panels */
   if (drowsiness) updateDrowsinessPanel(drowsiness);
-
-  /* ── Distraction panel ── */
   if (distraction) updateDistractionPanel(distraction);
 
-  /* ── Stats bar ── */
-  updateStats(drowsiness, distraction, safety_level);
+  /* Calculate Driver Safety Score */
+  calculateSafetyScore(drowsiness, distraction);
 
-  /* ── Alarm ── */
-  if (alarm && !state.alarmShown) {
+  /* Safety Level & Alerting */
+  updateSafetyLevel(safety_level, safety_message);
+
+  /* Cumulative Metrics & Distribution Counts */
+  updateSessionMetrics(drowsiness, distraction, safety_level);
+
+  /* Voice Synthesizer Alert */
+  evaluateVoiceAlert(drowsiness, distraction, safety_level);
+
+  /* Emergent Audio/Visual Alarm */
+  if (alarm && !state.alarmShown && state.settings.criticalEnabled) {
     triggerAlarm(safety_level, safety_message);
   }
 }
 
-/* ─── Safety level ─────────────────────────────────────── */
+/* ─── Driver Safety Score Algorithm ────────────────────── */
+function calculateSafetyScore(drowsiness, distraction) {
+  let score = state.currentScore;
+
+  const isDrowsy = drowsiness?.is_drowsy;
+  const isDistracted = distraction?.is_distracted;
+  const predDrowsy = drowsiness?.prediction;
+
+  if (isDrowsy) {
+    if (predDrowsy === "Closed") {
+      const dur = Number(drowsiness?.drowsy_elapsed_seconds || 0);
+      score -= dur > 1.5 ? 6 : 3;
+    } else if (predDrowsy === "yawn") {
+      score -= 2;
+    }
+  }
+
+  if (isDistracted) {
+    const dur = Number(distraction?.distracted_elapsed_seconds || 0);
+    score -= dur > 2.0 ? 5 : 2;
+  }
+
+  if (!isDrowsy && !isDistracted && drowsiness?.face_detected) {
+    score += 1.0; // gradual recovery
+  }
+
+  score = clamp(Math.round(score), 10, 100);
+  state.currentScore = score;
+  state.scoreHistory.push(score);
+  if (state.scoreHistory.length > 30) state.scoreHistory.shift();
+
+  /* Update Circular Progress Ring (circumference: ~314.16) */
+  const dashOffset = 314.16 * (1 - score / 100);
+  el.scoreRingFill.style.strokeDashoffset = dashOffset;
+  el.scoreValue.textContent = score;
+
+  /* Determine Rating Category & Color */
+  let color = "#10B981";
+  let label = "EXCELLENT";
+  if (score < 50) {
+    color = "#EF4444";
+    label = "CRITICAL";
+  } else if (score < 75) {
+    color = "#F59E0B";
+    label = "WARNING";
+  } else if (score < 90) {
+    color = "#0EA5A4";
+    label = "GOOD";
+  }
+
+  el.scoreRingFill.style.stroke = color;
+  el.scoreLabel.textContent = label;
+  el.scoreLabel.style.color = color;
+  el.trendCurrentScoreTag.textContent = `Score: ${score}`;
+
+  /* Update Trend Sparkline */
+  drawTrendLine();
+}
+
+/* ─── Current Driver Status Group ──────────────────────── */
+function updateDriverStatusIndicators(drowsiness, distraction) {
+  const closed = drowsiness?.prediction === "Closed";
+  const yawn   = drowsiness?.prediction === "yawn";
+  const dist   = distraction?.is_distracted;
+
+  /* Eyes */
+  el.statusEyesText.textContent = closed ? "CLOSED" : "OPEN";
+  el.statusEyesText.style.color = closed ? "var(--danger-red-dark)" : "var(--safe-green-dark)";
+  el.pillEyes.querySelector(".pill-icon-dot").className = `pill-icon-dot ${closed ? "danger" : "safe"}`;
+
+  /* Yawn */
+  el.statusYawnText.textContent = yawn ? "DETECTED" : "NO YAWN";
+  el.statusYawnText.style.color = yawn ? "var(--warn-orange-dark)" : "var(--safe-green-dark)";
+  el.pillYawn.querySelector(".pill-icon-dot").className = `pill-icon-dot ${yawn ? "warn" : "safe"}`;
+
+  /* Distraction */
+  el.statusDistractText.textContent = dist ? "DISTRACTED" : "SAFE";
+  el.statusDistractText.style.color = dist ? "var(--danger-red-dark)" : "var(--safe-green-dark)";
+  el.pillDistract.querySelector(".pill-icon-dot").className = `pill-icon-dot ${dist ? "danger" : "safe"}`;
+
+  /* Face Tag */
+  const faceOk = drowsiness?.face_detected;
+  el.camFaceTag.textContent = faceOk ? "FACE: TRACKED" : "FACE: NO FACE";
+  el.camFaceTag.style.color = faceOk ? "#60A5FA" : "#F87171";
+}
+
+/* ─── Safety Level & Banner ────────────────────────────── */
 function updateSafetyLevel(level, message) {
   const map = {
-    SAFE:        { badge: "SAFE",        cls: "badge-safe",     video: "v-safe",     wrap: "active"     },
-    DROWSY:      { badge: "DROWSY",      cls: "badge-danger",   video: "v-drowsy",   wrap: "drowsy"     },
-    DISTRACTED:  { badge: "DISTRACTED",  cls: "badge-warn",     video: "v-distract", wrap: "distracted" },
-    CRITICAL:    { badge: "CRITICAL",    cls: "badge-critical", video: "v-critical", wrap: "critical"   },
-    NO_FACE:     { badge: "NO FACE",     cls: "badge-muted",    video: "",           wrap: "active"     },
-    WAITING:     { badge: "WAITING",     cls: "badge-muted",    video: "",           wrap: "active"     },
-    MONITORING:  { badge: "MONITORING",  cls: "badge-muted",    video: "",           wrap: "active"     },
+    SAFE:        { badge: "SAFE",        cls: "badge-safe",     video: "v-safe",     wrap: "active",     dot: "#10B981" },
+    DROWSY:      { badge: "DROWSY",      cls: "badge-danger",   video: "v-drowsy",   wrap: "drowsy",     dot: "#EF4444" },
+    DISTRACTED:  { badge: "DISTRACTED",  cls: "badge-warn",     video: "v-distract", wrap: "distracted", dot: "#F59E0B" },
+    CRITICAL:    { badge: "CRITICAL",    cls: "badge-critical", video: "v-critical", wrap: "critical",   dot: "#DC2626" },
+    NO_FACE:     { badge: "NO FACE",     cls: "badge-muted",    video: "",           wrap: "active",     dot: "#94A3B8" },
+    WAITING:     { badge: "WAITING",     cls: "badge-muted",    video: "",           wrap: "active",     dot: "#94A3B8" },
+    MONITORING:  { badge: "MONITORING",  cls: "badge-muted",    video: "",           wrap: "active",     dot: "#2563EB" },
   };
 
   const cfg = map[level] ?? map["WAITING"];
   setSafetyBadge(cfg.badge, cfg.cls);
   setVideoStatus(cfg.badge, cfg.video);
 
-  /* Update video-wrap state class */
   el.videoWrap.className = `video-wrap ${cfg.wrap}`;
 
-  /* Show inline alert banner for danger states */
-  if (level === "DROWSY" || level === "DISTRACTED" || level === "CRITICAL") {
-    showBanner(message || cfg.badge, level);
-  } else {
+  /* Alert Strip Banner */
+  if (state.settings.visualEnabled && (level === "DROWSY" || level === "DISTRACTED" || level === "CRITICAL")) {
+    showBanner(message || `${cfg.badge} DETECTED`, level);
+  } else if (level === "SAFE") {
     hideBanner();
   }
 
-  /* Update safety stat value & dynamic indicator dot in bottom summary bar */
-  const statSafetyDot = document.querySelector(".safety-indicator-dot");
-  if (statSafetyDot) {
-    const dotColors = {
-      SAFE:        "#10B981",
-      DROWSY:      "#EF4444",
-      DISTRACTED:  "#F59E0B",
-      CRITICAL:    "#DC2626",
-      WAITING:     "#94A3B8",
-      MONITORING:  "#2563EB",
-    };
-    statSafetyDot.style.backgroundColor = dotColors[level] || "#94A3B8";
-  }
+  /* Safety Metric Pill */
   el.statSafety.textContent = cfg.badge;
-  if (level === "SAFE") el.statSafety.style.color = "#059669";
-  else if (level === "DROWSY") el.statSafety.style.color = "#DC2626";
-  else if (level === "DISTRACTED") el.statSafety.style.color = "#D97706";
-  else if (level === "CRITICAL") el.statSafety.style.color = "#B91C1C";
-  else el.statSafety.style.color = "var(--navy-dark)";
+  el.safetyIndicatorDot.style.backgroundColor = cfg.dot;
+
+  /* Check for Alert History & Timeline Event creation */
+  if (level === "DROWSY" || level === "DISTRACTED" || level === "CRITICAL") {
+    recordAlertEvent(level, message);
+  }
 }
 
-/* ─── Drowsiness panel ─────────────────────────────────── */
+/* ─── Drowsiness Panel ─────────────────────────────────── */
 function updateDrowsinessPanel(d) {
   const isDrowsy    = d.is_drowsy;
   const noFace      = !d.face_detected;
   const isUncertain = d.status === "LOW CONFIDENCE" || d.status === "UNCERTAIN";
 
-  /* Badge */
   const badgeCls = isDrowsy ? "badge-danger" : isUncertain ? "badge-muted" : "badge-safe";
   const badgeTxt = isDrowsy ? "DROWSY" : noFace ? "NO FACE" : isUncertain ? "UNCERTAIN" : "ALERT";
   setBadge(el.drowsinessBadge, badgeTxt, badgeCls);
 
-  /* Panel border */
   el.drowsinessPanel.className =
-    `panel detection-panel ${isDrowsy ? "state-drowsy" : noFace ? "" : "state-safe"}`;
+    `panel detection-panel compact-panel ${isDrowsy ? "state-drowsy" : noFace ? "" : "state-safe"}`;
 
-  /* Icon */
   el.drowsinessIcon.textContent = isDrowsy ? "!" : noFace ? "?" : "✓";
-  el.drowsinessIcon.className   =
-    `det-icon ${isDrowsy ? "drowsy" : noFace ? "" : "safe"}`;
+  el.drowsinessIcon.className   = `det-icon mini-icon ${isDrowsy ? "drowsy" : noFace ? "" : "safe"}`;
 
-  /* Label */
   el.drowsinessLabel.textContent = formatDrowsinessLabel(d.prediction);
   el.drowsinessRaw.textContent   = `Raw: ${formatDrowsinessLabel(d.raw_prediction)}`;
-  el.drowsinessLabel.style.color = isDrowsy ? "var(--clr-danger)" : "var(--clr-text)";
+  el.drowsinessLabel.style.color = isDrowsy ? "var(--clr-danger)" : "var(--navy-dark)";
 
-  /* Confidence */
   const conf = clamp(Number(d.confidence ?? 0), 0, 100);
   el.drowsinessConf.textContent = `${conf.toFixed(1)}%`;
-  setBar(el.drowsinessBar, conf,
-    isDrowsy ? "prog-fill drowsy-fill" : "prog-fill alert-fill");
+  setBar(el.drowsinessBar, conf, isDrowsy ? "prog-fill drowsy-fill" : "prog-fill alert-fill");
 
-  /* Class probabilities */
   const probs = d.probabilities ?? {};
   setProbRow("pClosed", "bClosed", probs["Closed"],  true);
   setProbRow("pOpen",   "bOpen",   probs["Open"],    false);
   setProbRow("pNoYawn", "bNoYawn", probs["no_yawn"], false);
   setProbRow("pYawn",   "bYawn",   probs["yawn"],    true);
 
-  /* Timing */
   el.drowsyDuration.textContent = `${Number(d.drowsy_elapsed_seconds ?? 0).toFixed(1)} s`;
   el.drowsyFrames.textContent   = d.drowsy_frame_count ?? 0;
   el.faceDetected.textContent   = d.face_detected ? "YES" : "NO";
   el.faceDetected.style.color   = d.face_detected ? "var(--clr-safe)" : "var(--clr-warn)";
+
+  updateDriverStatusIndicators(d, null);
 }
 
-/* ─── Distraction panel ────────────────────────────────── */
+/* ─── Distraction Panel ────────────────────────────────── */
 function updateDistractionPanel(d) {
   const isDistracted = d.is_distracted;
   const isUncertain  = d.status === "UNCERTAIN";
 
-  /* Badge */
   const badgeCls = isDistracted ? "badge-warn" : isUncertain ? "badge-muted" : "badge-safe";
   const badgeTxt = isDistracted ? "DISTRACTED" : isUncertain ? "UNCERTAIN" : "NOT DISTRACTED";
   setBadge(el.distractionBadge, badgeTxt, badgeCls);
 
-  /* Panel border */
   el.distractionPanel.className =
-    `panel detection-panel ${isDistracted ? "state-warn" : isUncertain ? "" : "state-safe"}`;
+    `panel detection-panel compact-panel ${isDistracted ? "state-warn" : isUncertain ? "" : "state-safe"}`;
 
-  /* Icon */
   el.distractionIcon.textContent = isDistracted ? "!" : "✓";
-  el.distractionIcon.className   =
-    `det-icon ${isDistracted ? "warn" : isUncertain ? "" : "safe"}`;
+  el.distractionIcon.className   = `det-icon mini-icon ${isDistracted ? "warn" : isUncertain ? "" : "safe"}`;
 
-  /* Label */
   el.distractionLabel.textContent = d.prediction ?? "Waiting…";
   el.distractionRaw.textContent   = `Raw: ${d.raw_prediction ?? "—"}`;
-  el.distractionLabel.style.color = isDistracted ? "var(--clr-warn)" : "var(--clr-text)";
+  el.distractionLabel.style.color = isDistracted ? "var(--clr-warn)" : "var(--navy-dark)";
 
-  /* Confidence */
   const conf = clamp(Number(d.confidence ?? 0), 0, 100);
   el.distractionConf.textContent = `${conf.toFixed(1)}%`;
-  setBar(el.distractionBar, conf,
-    isDistracted ? "prog-fill warn-fill" : "prog-fill alert-fill");
+  setBar(el.distractionBar, conf, isDistracted ? "prog-fill warn-fill" : "prog-fill alert-fill");
 
-  /* Top-3 */
   const top3 = d.top_classes ?? [];
   const rows = [
     { name: el.top3Name0, conf: el.top3Conf0, row: el.top3_0 },
@@ -480,55 +727,435 @@ function updateDistractionPanel(d) {
     if (item) {
       r.name.textContent = item.class_name;
       r.conf.textContent = `${Number(item.confidence ?? 0).toFixed(1)}%`;
-      r.row.className    = `top3-item${i === 0 ? " is-top" : ""}`;
+      r.row.className    = `top3-item compact-item${i === 0 ? " is-top" : ""}`;
     } else {
       r.name.textContent = "—";
       r.conf.textContent = "—";
-      r.row.className    = "top3-item";
+      r.row.className    = "top3-item compact-item";
     }
   });
 
-  /* Timing */
   el.distractDuration.textContent = `${Number(d.distracted_elapsed_seconds ?? 0).toFixed(1)} s`;
   el.distractFrames.textContent   = d.distracted_frame_count ?? 0;
 }
 
-/* ─── Stats bar ────────────────────────────────────────── */
-function updateStats(drowsiness, distraction, safetyLevel) {
-  /* Use the higher of the two frame counters */
+/* =========================================================
+   SESSION OVERVIEW, DONUT & TREND CHARTS
+========================================================= */
+function updateSessionMetrics(drowsiness, distraction, safetyLevel) {
   const frames = Math.max(
-    Number(drowsiness?.total_frames  ?? 0),
+    Number(drowsiness?.total_frames ?? 0),
     Number(distraction?.total_frames ?? 0)
   );
 
-  if (frames > state.maxFrames)          state.maxFrames          = frames;
-  if ((drowsiness?.drowsy_events   ?? 0) > state.maxDrowsyEvents)
-      state.maxDrowsyEvents  = drowsiness.drowsy_events;
+  if (frames > state.maxFrames) state.maxFrames = frames;
+  if ((drowsiness?.drowsy_events ?? 0) > state.maxDrowsyEvents)
+    state.maxDrowsyEvents = drowsiness.drowsy_events;
   if ((distraction?.distracted_events ?? 0) > state.maxDistractEvents)
-      state.maxDistractEvents = distraction.distracted_events;
+    state.maxDistractEvents = distraction.distracted_events;
 
-  el.statFrames.textContent        = state.maxFrames;
-  el.statDrowsyEvents.textContent  = state.maxDrowsyEvents;
-  el.statDistractEvents.textContent= state.maxDistractEvents;
+  /* Count yawns specifically */
+  if (drowsiness?.prediction === "yawn" && drowsiness?.confidence > 0.4) {
+    state.maxYawnEvents++;
+  }
+
+  el.statFrames.textContent         = state.maxFrames.toLocaleString();
+  el.statDrowsyEvents.textContent   = state.maxDrowsyEvents;
+  el.statDistractEvents.textContent = state.maxDistractEvents;
+  el.statYawnEvents.textContent     = Math.min(state.maxYawnEvents, state.maxDrowsyEvents);
+
+  /* Average confidence computation */
+  const curConf = (Number(drowsiness?.confidence || 0) + Number(distraction?.confidence || 0)) / 2;
+  if (curConf > 0) {
+    state.confidenceSum += curConf;
+    state.confidenceCount++;
+    const avg = state.confidenceSum / state.confidenceCount;
+    el.statAvgConfidence.textContent = `${avg.toFixed(1)}%`;
+  }
+
+  /* Donut Distribution Counts */
+  if (drowsiness?.prediction === "Open")   state.counts.eyesOpen++;
+  if (drowsiness?.prediction === "Closed") state.counts.eyesClosed++;
+  if (drowsiness?.prediction === "yawn")   state.counts.yawns++;
+  if (distraction?.is_distracted)          state.counts.distractions++;
+
+  el.cntEyesOpen.textContent     = state.counts.eyesOpen;
+  el.cntEyesClosed.textContent   = state.counts.eyesClosed;
+  el.cntYawns.textContent        = state.counts.yawns;
+  el.cntDistractions.textContent = state.counts.distractions;
+
+  updateDonutChart();
+}
+
+function updateDonutChart() {
+  const total = state.counts.eyesOpen + state.counts.eyesClosed + state.counts.yawns + state.counts.distractions;
+  if (total === 0) return;
+
+  const C = 238.76; // Circumference of r=38
+  const pOpen = (state.counts.eyesOpen / total) * C;
+  const pYawn = (state.counts.yawns / total) * C;
+  const pClosed = (state.counts.eyesClosed / total) * C;
+  const pDist = (state.counts.distractions / total) * C;
+
+  el.donutEyesOpen.style.strokeDasharray = `${pOpen} ${C}`;
+  el.donutEyesOpen.style.strokeDashoffset = "0";
+
+  el.donutYawn.style.strokeDasharray = `${pYawn} ${C}`;
+  el.donutYawn.style.strokeDashoffset = `-${pOpen}`;
+
+  el.donutEyesClosed.style.strokeDasharray = `${pClosed} ${C}`;
+  el.donutEyesClosed.style.strokeDashoffset = `-${pOpen + pYawn}`;
+
+  el.donutDistract.style.strokeDasharray = `${pDist} ${C}`;
+  el.donutDistract.style.strokeDashoffset = `-${pOpen + pYawn + pClosed}`;
+}
+
+function drawTrendLine() {
+  const pts = state.scoreHistory;
+  if (!pts || pts.length < 2) return;
+
+  const w = 300;
+  const h = 60;
+  const dx = w / (pts.length - 1);
+
+  let pathD = `M 0 ${h - (pts[0] / 100) * (h - 10) - 5}`;
+  for (let i = 1; i < pts.length; i++) {
+    const x = Math.round(i * dx);
+    const y = Math.round(h - (pts[i] / 100) * (h - 10) - 5);
+    pathD += ` L ${x} ${y}`;
+  }
+
+  el.trendLine.setAttribute("d", pathD);
+  el.trendArea.setAttribute("d", `${pathD} L ${w} ${h} L 0 ${h} Z`);
 }
 
 /* =========================================================
-   ALARM
+   LIVE HORIZONTAL TIMELINE & ALERT HISTORY
+========================================================= */
+let lastLoggedEvent = "";
+
+function recordAlertEvent(level, message) {
+  const now = new Date();
+  const timeStr = now.toTimeString().split(" ")[0];
+  const eventKey = `${level}-${message}`;
+
+  if (eventKey === lastLoggedEvent) return; // avoid duplicate spam
+  lastLoggedEvent = eventKey;
+
+  const eventObj = {
+    time: timeStr,
+    level: level,
+    desc: message || `${level} detected`,
+    score: state.currentScore,
+  };
+
+  state.alertHistory.unshift(eventObj);
+  if (state.alertHistory.length > 50) state.alertHistory.pop();
+
+  el.alertTabCount.textContent = state.alertHistory.length;
+
+  /* Add to Timeline Rail */
+  const chipCls = level === "CRITICAL" || level === "DROWSY" ? "chip-danger" : "chip-warn";
+  addTimelineEvent(`${timeStr} • ${level}`, chipCls);
+
+  /* Update Recent Alert History Card */
+  renderRecentAlerts();
+
+  /* Auto snapshot on critical events */
+  if (level === "CRITICAL" && state.monitoring) {
+    captureSnapshot();
+  }
+}
+
+function addTimelineEvent(text, chipClass) {
+  const now = new Date().toTimeString().split(" ")[0];
+  const chip = document.createElement("div");
+  chip.className = `timeline-event-chip ${chipClass}`;
+  chip.innerHTML = `<span class="event-time">${now}</span><span class="event-desc">${text}</span>`;
+
+  el.timelineRail.appendChild(chip);
+  while (el.timelineRail.children.length > 10) {
+    el.timelineRail.removeChild(el.timelineRail.firstChild);
+  }
+  el.timelineRail.scrollLeft = el.timelineRail.scrollWidth;
+}
+
+function renderRecentAlerts() {
+  if (state.alertHistory.length === 0) {
+    el.historyEmptyState.hidden = false;
+    return;
+  }
+  el.historyEmptyState.hidden = true;
+
+  el.alertHistoryList.innerHTML = "";
+  state.alertHistory.slice(0, 4).forEach(item => {
+    const div = document.createElement("div");
+    div.className = "history-item";
+    const tagCls = item.level === "CRITICAL" || item.level === "DROWSY" ? "tag-danger" : "tag-warn";
+    div.innerHTML = `
+      <span class="history-time">${item.time}</span>
+      <span class="history-tag ${tagCls}">${item.level}</span>
+      <span class="history-conf">Score: ${item.score}</span>
+    `;
+    el.alertHistoryList.appendChild(div);
+  });
+
+  /* Also populate full table in Alerts tab */
+  renderFullAlertTable();
+}
+
+function renderFullAlertTable() {
+  el.fullAlertsTbody.innerHTML = "";
+  if (state.alertHistory.length === 0) {
+    el.fullAlertsTbody.innerHTML = `<tr><td colspan="6" class="table-empty">No alerts recorded yet.</td></tr>`;
+    return;
+  }
+
+  state.alertHistory.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.time}</td>
+      <td><span class="history-tag ${item.level === "CRITICAL" ? "tag-danger" : "tag-warn"}">${item.level}</span></td>
+      <td>${item.desc}</td>
+      <td>—</td>
+      <td><strong>${item.score}/100</strong></td>
+      <td>${state.snapshots.length > 0 ? "Saved" : "—"}</td>
+    `;
+    el.fullAlertsTbody.appendChild(tr);
+  });
+}
+
+function clearAlertHistory() {
+  state.alertHistory = [];
+  el.alertTabCount.textContent = "0";
+  renderRecentAlerts();
+  renderFullAlertTable();
+}
+
+/* =========================================================
+   VOICE ALERT (WEB SPEECH API)
+========================================================= */
+function evaluateVoiceAlert(drowsiness, distraction, safetyLevel) {
+  if (!state.settings.voiceEnabled) return;
+
+  const now = performance.now();
+  if (now - state.lastVoiceTs < CONFIG.voiceCooldownMs) return;
+
+  let phrase = null;
+  if (safetyLevel === "CRITICAL") {
+    phrase = "Critical safety warning. Please focus on driving immediately.";
+  } else if (drowsiness?.prediction === "Closed" && (drowsiness?.drowsy_elapsed_seconds || 0) > 1.2) {
+    phrase = "Warning. Drowsiness detected. Please stay alert.";
+  } else if (drowsiness?.prediction === "yawn") {
+    phrase = "Fatigue detected. Please remain attentive.";
+  } else if (distraction?.is_distracted && (distraction?.distracted_elapsed_seconds || 0) > 2.0) {
+    phrase = "Distraction detected. Please keep eyes on the road.";
+  }
+
+  if (phrase) {
+    speakVoiceAlert(phrase);
+    state.lastVoiceTs = now;
+  }
+}
+
+function speakVoiceAlert(text) {
+  try {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel(); // clear queue
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.volume = state.settings.volume;
+    utter.rate = 1.0;
+    utter.pitch = 1.0;
+    window.speechSynthesis.speak(utter);
+  } catch (e) {
+    console.warn("[DriverGuard] Speech synthesis error:", e);
+  }
+}
+
+function toggleVoiceAlert() {
+  state.settings.voiceEnabled = !state.settings.voiceEnabled;
+  el.voiceText.textContent = `Voice: ${state.settings.voiceEnabled ? "ON" : "OFF"}`;
+  el.btnVoiceToggle.classList.toggle("active", state.settings.voiceEnabled);
+  el.setVoiceToggle.checked = state.settings.voiceEnabled;
+}
+
+/* =========================================================
+   FOCUS MODE & FULLSCREEN CAMERA
+========================================================= */
+function enterFocusMode() {
+  document.body.classList.add("focus-mode-active");
+  el.btnExitFocus.hidden = false;
+}
+
+function exitFocusMode() {
+  document.body.classList.remove("focus-mode-active");
+  el.btnExitFocus.hidden = true;
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    el.videoWrap.requestFullscreen?.() || el.videoWrap.webkitRequestFullscreen?.();
+  } else {
+    document.exitFullscreen?.();
+  }
+}
+
+/* =========================================================
+   SNAPSHOT CAPTURE & GALLERY
+========================================================= */
+function captureSnapshot() {
+  if (!state.monitoring) {
+    alert("Camera is not active. Click Start Monitoring first.");
+    return;
+  }
+  try {
+    const dataUrl = el.captureCanvas.toDataURL("image/jpeg", 0.85);
+    const now = new Date().toTimeString().split(" ")[0];
+    const snap = {
+      time: now,
+      score: state.currentScore,
+      src: dataUrl,
+    };
+    state.snapshots.unshift(snap);
+    if (state.snapshots.length > 20) state.snapshots.pop();
+
+    el.galleryCount.textContent = state.snapshots.length;
+    renderGallery();
+  } catch (e) {
+    console.error("[DriverGuard] Snapshot error:", e);
+  }
+}
+
+function renderGallery() {
+  el.galleryGrid.innerHTML = "";
+  if (state.snapshots.length === 0) {
+    el.galleryGrid.innerHTML = `<div class="table-empty">No snapshots captured yet.</div>`;
+    return;
+  }
+  state.snapshots.forEach(s => {
+    const card = document.createElement("div");
+    card.className = "gallery-card";
+    card.innerHTML = `
+      <img src="${s.src}" class="gallery-img" alt="Snapshot" />
+      <div class="gallery-info">
+        <span>${s.time}</span>
+        <strong>Score: ${s.score}</strong>
+      </div>
+    `;
+    el.galleryGrid.appendChild(card);
+  });
+}
+
+function clearGallery() {
+  state.snapshots = [];
+  el.galleryCount.textContent = "0";
+  renderGallery();
+}
+
+/* =========================================================
+   SESSION TIMER & COMPLETE MODAL
+========================================================= */
+function startSessionTimer() {
+  stopSessionTimer();
+  state.sessionClockTimer = setInterval(() => {
+    state.sessionSeconds++;
+    const hrs = String(Math.floor(state.sessionSeconds / 3600)).padStart(2, "0");
+    const mins = String(Math.floor((state.sessionSeconds % 3600) / 60)).padStart(2, "0");
+    const secs = String(state.sessionSeconds % 60).padStart(2, "0");
+    el.sessionTimer.textContent = `${hrs}:${mins}:${secs}`;
+  }, 1000);
+}
+
+function stopSessionTimer() {
+  if (state.sessionClockTimer) {
+    clearInterval(state.sessionClockTimer);
+    state.sessionClockTimer = null;
+  }
+}
+
+function openSessionCompleteModal() {
+  el.compTime.textContent = el.sessionTimer.textContent;
+  el.compFrames.textContent = state.maxFrames.toLocaleString();
+  el.compDrowsy.textContent = state.maxDrowsyEvents;
+  el.compYawns.textContent = state.maxYawnEvents;
+  el.compDistract.textContent = state.maxDistractEvents;
+  el.completeScoreCircle.textContent = state.currentScore;
+  el.completeScoreHeading.textContent = `Driver Safety Score: ${state.currentScore} / 100`;
+
+  el.sessionCompleteModal.hidden = false;
+}
+
+/* =========================================================
+   REPORT DOCUMENT & EXPORT (CSV & PDF)
+========================================================= */
+function updateReportDocument() {
+  el.reportDate.textContent = new Date().toLocaleDateString(undefined, {
+    year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"
+  });
+  el.repTime.textContent     = el.sessionTimer.textContent;
+  el.repFrames.textContent   = state.maxFrames.toLocaleString();
+  el.repScore.textContent    = `${state.currentScore} / 100`;
+  el.repDrowsy.textContent   = state.maxDrowsyEvents;
+  el.repYawns.textContent    = state.maxYawnEvents;
+  el.repDistract.textContent = state.maxDistractEvents;
+}
+
+function exportSessionCSV() {
+  const rows = [
+    ["Timestamp", "Severity", "Event", "SafetyScore"],
+    ...state.alertHistory.map(a => [a.time, a.level, `"${a.desc}"`, a.score]),
+  ];
+  if (rows.length === 1) {
+    rows.push([new Date().toLocaleTimeString(), "INFO", "Session Finished", state.currentScore]);
+  }
+
+  const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `DriverGuard_Session_${Date.now()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function exportSessionPDF() {
+  switchTab("report");
+  setTimeout(() => window.print(), 300);
+}
+
+/* =========================================================
+   SETTINGS MODAL LOGIC
+========================================================= */
+function initSettings() {
+  el.setVoiceToggle.addEventListener("change", e => {
+    state.settings.voiceEnabled = e.target.checked;
+    el.voiceText.textContent = `Voice: ${e.target.checked ? "ON" : "OFF"}`;
+  });
+  el.setVisualToggle.addEventListener("change", e => {
+    state.settings.visualEnabled = e.target.checked;
+  });
+  el.setCriticalToggle.addEventListener("change", e => {
+    state.settings.criticalEnabled = e.target.checked;
+  });
+  el.setVolumeSlider.addEventListener("input", e => {
+    state.settings.volume = Number(e.target.value) / 100;
+    el.setVolumeVal.textContent = `${e.target.value}%`;
+  });
+}
+
+function openSettings() { el.settingsModal.hidden = false; }
+function closeSettings() { el.settingsModal.hidden = true; }
+
+/* =========================================================
+   ALARM & BANNER HELPERS
 ========================================================= */
 function triggerAlarm(level, message) {
   state.alarmShown = true;
-
-  const titleMap = {
-    DROWSY:     "⚠ DROWSINESS DETECTED",
-    DISTRACTED: "⚠ DISTRACTION DETECTED",
-    CRITICAL:   "⚠ CRITICAL ALERT",
-  };
-
-  el.alarmTitle.textContent = titleMap[level] ?? "⚠ ALERT";
-  el.alarmBody.textContent  = message ?? "Please stay attentive.";
+  el.alarmTitle.textContent = `${level} ALERT DETECTED`;
+  el.alarmBody.textContent  = message ?? "Driver fatigue or distraction warning detected.";
   el.alarmBackdrop.hidden   = false;
-
-  playAlarmSound();
+  playAlarmAudio();
 }
 
 function hideAlarm() {
@@ -536,11 +1163,10 @@ function hideAlarm() {
   state.alarmShown = false;
 }
 
-/* ─── Inline banner (non-blocking) ─────────────────────── */
 function showBanner(text, level = "CRITICAL") {
   el.alertBannerText.textContent = text;
-  const isWarn = level === "DISTRACTED";
-  el.alertBanner.className = `alert-banner ${isWarn ? "alert-warning" : "alert-critical"}`;
+  el.alertStripBadge.textContent = level;
+  el.alertBanner.className = `alert-banner ${level === "DISTRACTED" ? "alert-warning" : "alert-critical"}`;
   el.alertBanner.hidden = false;
 }
 
@@ -548,145 +1174,129 @@ function hideBanner() {
   el.alertBanner.hidden = true;
 }
 
-/* ─── Audio alarm ──────────────────────────────────────── */
-function playAlarmSound() {
+function playAlarmAudio() {
   try {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
-
-    const ctx  = new Ctx();
-    const osc  = ctx.createOscillator();
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "square";
     osc.frequency.value = 880;
-
     gain.gain.setValueAtTime(0.001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.28,  ctx.currentTime + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    gain.gain.exponentialRampToValueAtTime(0.25 * state.settings.volume, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.8);
-
-    setTimeout(() => ctx.close(), 1200);
+    osc.stop(ctx.currentTime + 0.7);
+    setTimeout(() => ctx.close(), 1000);
   } catch (e) {
-    console.warn("[DriverGuard] Alarm audio unavailable:", e);
+    console.warn("[DriverGuard] Audio playback disabled:", e);
   }
 }
 
 /* =========================================================
-   RESET
+   SESSION RESET
 ========================================================= */
 async function resetSession() {
   try {
-    const res = await fetch(`${CONFIG.apiUrl}/api/reset`, { method: "POST" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await fetch(`${CONFIG.apiUrl}/api/reset`, { method: "POST" });
     resetUI();
     hideBanner();
     hideAlarm();
     console.log("[DriverGuard] Session reset.");
   } catch (err) {
     console.error("[DriverGuard] Reset error:", err);
-    alert("Could not reach the backend to reset.\nIs the server running?");
   }
 }
 
-/* =========================================================
-   RESET UI (without stopping the camera)
-========================================================= */
 function resetUI() {
-  state.maxFrames          = 0;
-  state.maxDrowsyEvents    = 0;
-  state.maxDistractEvents  = 0;
-  state.alarmShown         = false;
+  state.maxFrames         = 0;
+  state.maxDrowsyEvents   = 0;
+  state.maxYawnEvents     = 0;
+  state.maxDistractEvents = 0;
+  state.confidenceSum     = 0;
+  state.confidenceCount   = 0;
+  state.sessionSeconds    = 0;
+  state.currentScore      = 100;
+  state.scoreHistory      = [100, 100, 100, 100, 100];
+  state.counts            = { eyesOpen: 0, eyesClosed: 0, yawns: 0, distractions: 0 };
+  state.alertHistory      = [];
+  state.snapshots         = [];
 
-  /* Drowsiness */
+  el.sessionTimer.textContent = "00:00:00";
+  el.scoreValue.textContent = "100";
+  el.scoreLabel.textContent = "EXCELLENT";
+  el.scoreRingFill.style.strokeDashoffset = "0";
+  el.scoreRingFill.style.stroke = "#10B981";
+
   setBadge(el.drowsinessBadge, "WAITING", "");
-  el.drowsinessIcon.textContent  = "?";
-  el.drowsinessIcon.className    = "det-icon";
+  el.drowsinessIcon.textContent = "?";
+  el.drowsinessIcon.className = "det-icon mini-icon";
   el.drowsinessLabel.textContent = "Waiting…";
-  el.drowsinessRaw.textContent   = "Raw: —";
-  el.drowsinessLabel.style.color = "";
-  el.drowsinessConf.textContent  = "0%";
+  el.drowsinessRaw.textContent = "Raw: —";
+  el.drowsinessConf.textContent = "0%";
   setBar(el.drowsinessBar, 0, "prog-fill");
-  setProbRow("pClosed", "bClosed", 0,  true);
-  setProbRow("pOpen",   "bOpen",   0, false);
+  setProbRow("pClosed", "bClosed", 0, true);
+  setProbRow("pOpen", "bOpen", 0, false);
   setProbRow("pNoYawn", "bNoYawn", 0, false);
-  setProbRow("pYawn",   "bYawn",   0,  true);
+  setProbRow("pYawn", "bYawn", 0, true);
   el.drowsyDuration.textContent = "0.0 s";
-  el.drowsyFrames.textContent   = "0";
-  el.faceDetected.textContent   = "—";
-  el.faceDetected.style.color   = "";
-  el.drowsinessPanel.className  = "panel detection-panel";
+  el.drowsyFrames.textContent = "0";
+  el.faceDetected.textContent = "—";
 
-  /* Distraction */
   setBadge(el.distractionBadge, "WAITING", "");
-  el.distractionIcon.textContent  = "?";
-  el.distractionIcon.className    = "det-icon";
+  el.distractionIcon.textContent = "?";
+  el.distractionIcon.className = "det-icon mini-icon";
   el.distractionLabel.textContent = "Waiting…";
-  el.distractionRaw.textContent   = "Raw: —";
-  el.distractionLabel.style.color = "";
-  el.distractionConf.textContent  = "0%";
+  el.distractionRaw.textContent = "Raw: —";
+  el.distractionConf.textContent = "0%";
   setBar(el.distractionBar, 0, "prog-fill");
-  [0,1,2].forEach(i => {
+  [0, 1, 2].forEach(i => {
     $(`top3Name${i}`).textContent = "—";
     $(`top3Conf${i}`).textContent = "—";
-    $(`top3_${i}`).className      = "top3-item";
+    $(`top3_${i}`).className = "top3-item compact-item";
   });
   el.distractDuration.textContent = "0.0 s";
-  el.distractFrames.textContent   = "0";
-  el.distractionPanel.className   = "panel detection-panel";
+  el.distractFrames.textContent = "0";
 
-  /* Safety */
   setSafetyBadge("WAITING", "");
   setVideoStatus("WAITING", "");
 
-  /* Stats */
-  el.statFrames.textContent         = "0";
-  el.statDrowsyEvents.textContent   = "0";
+  el.statFrames.textContent = "0";
+  el.statDrowsyEvents.textContent = "0";
+  el.statYawnEvents.textContent = "0";
   el.statDistractEvents.textContent = "0";
-  el.statSafety.textContent         = "—";
-  el.statSafety.style.color         = "";
-  const statSafetyDot = document.querySelector(".safety-indicator-dot");
-  if (statSafetyDot) statSafetyDot.style.backgroundColor = "#94A3B8";
+  el.statAvgConfidence.textContent = "—";
+  el.statSafety.textContent = "—";
+  el.safetyIndicatorDot.style.backgroundColor = "#94A3B8";
 
-  /* Inference */
   el.inferenceTime.textContent = "— ms";
+  el.fpsValue.textContent = "— fps";
 
-  /* FPS */
-  const fpsVal = document.getElementById("fpsValue");
-  if (fpsVal) {
-    fpsVal.textContent = "— fps";
-  } else {
-    el.fpsBadge.textContent = "— fps";
-  }
+  el.timelineRail.innerHTML = `<div class="timeline-event-chip chip-init"><span class="event-time">--:--:--</span><span class="event-desc">System Initialized</span></div>`;
+  renderRecentAlerts();
+  updateDonutChart();
+  drawTrendLine();
 }
 
 /* =========================================================
-   FPS TRACKING
+   FPS TRACKING & HELPERS
 ========================================================= */
 function trackFps() {
   state.frameCount++;
-  const now     = performance.now();
+  const now = performance.now();
   const elapsed = now - state.fpsLastTs;
   if (elapsed >= 1000) {
-    state.currentFps   = Math.round(state.frameCount * 1000 / elapsed);
-    const fpsVal = document.getElementById("fpsValue");
-    if (fpsVal) {
-      fpsVal.textContent = `${state.currentFps} fps`;
-    } else {
-      el.fpsBadge.textContent = `${state.currentFps} fps`;
-    }
-    state.frameCount   = 0;
-    state.fpsLastTs    = now;
+    state.currentFps = Math.round(state.frameCount * 1000 / elapsed);
+    el.fpsValue.textContent = `${state.currentFps} fps`;
+    state.frameCount = 0;
+    state.fpsLastTs  = now;
   }
 }
-
-/* =========================================================
-   UI HELPERS
-========================================================= */
 
 function setSafetyBadge(text, cls) {
   el.safetyBadge.textContent = text;
@@ -708,19 +1318,12 @@ function setBar(elem, pct, className) {
   elem.className   = className;
 }
 
-/**
- * Update a single probability row (value label + bar fill).
- * @param {string} valId   - element id for the percentage text
- * @param {string} barId   - element id for the progress bar fill
- * @param {number} prob    - probability [0.0–1.0] (decimal, not percent)
- * @param {boolean} isDrowsy - true → red fill, false → green fill
- */
 function setProbRow(valId, barId, prob, isDrowsy) {
   const pct = clamp(Number(prob ?? 0) * 100, 0, 100);
-  $(valId).textContent   = `${pct.toFixed(1)}%`;
+  $(valId).textContent = `${pct.toFixed(1)}%`;
   const bar = $(barId);
-  bar.style.width  = `${pct}%`;
-  bar.className    = `prog-fill ${isDrowsy ? "drowsy-fill" : "alert-fill"}`;
+  bar.style.width = `${pct}%`;
+  bar.className   = `prog-fill ${isDrowsy ? "drowsy-fill" : "alert-fill"}`;
 }
 
 function formatDrowsinessLabel(raw) {
