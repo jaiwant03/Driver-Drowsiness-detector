@@ -494,7 +494,7 @@ export function AnalyticsTab({
                   <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
               </span>
-              Distraction Behavior Breakdown (ResNet-18)
+              <span className="ap-card-title-multicolor">Distraction Behavior Breakdown (ResNet-18)</span>
             </h2>
           </div>
 
