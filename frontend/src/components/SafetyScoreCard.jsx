@@ -138,7 +138,7 @@ export function SafetyScoreCard({ score, safetyLevel, drowsinessData, distractio
           </div>
           <div className="status-pill-item" id="pillDistract">
             <span className={`pill-dot ${isDistracted ? "danger" : "safe"}`}></span>
-            <span className="pill-title">Distraction:</span>
+            <span className="pill-title">Focus:</span>
             <strong
               className="pill-val"
               id="statusDistractText"
@@ -152,15 +152,15 @@ export function SafetyScoreCard({ score, safetyLevel, drowsinessData, distractio
         {/* Safety System Metrics Row (Symmetrical with other cards) */}
         <div className="timer-row">
           <div className="timer-cell">
-            <span className="timer-label">Algorithm</span>
-            <strong>MobileNet+Shuffle</strong>
+            <span className="timer-label">Model</span>
+            <strong>MobileNet</strong>
           </div>
           <div className="timer-cell">
             <span className="timer-label">Pipeline</span>
-            <strong>Dual Neural Vision</strong>
+            <strong>Dual-AI</strong>
           </div>
           <div className="timer-cell">
-            <span className="timer-label">Risk Level</span>
+            <span className="timer-label">Risk</span>
             <strong style={{ color: scoreColor }}>{scoreLabel}</strong>
           </div>
         </div>
