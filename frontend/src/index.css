@@ -1092,28 +1092,32 @@ html, body {
 .telemetry-col {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  justify-content: space-between;
+  overflow-y: auto;
 }
 
 /* ─── 1. Safety Score & Status Card ──────────────────────────────── */
 .score-card-body {
-  padding: 14px 18px;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .score-main-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 
 .score-ring-container {
   position: relative;
-  width: 82px;
-  height: 82px;
+  width: 68px;
+  height: 68px;
   margin: 0;
   flex-shrink: 0;
 }
@@ -1130,21 +1134,21 @@ html, body {
 }
 .score-number {
   font-family: var(--font-heading);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--navy-dark);
 }
 .score-out-of {
-  font-size: 9.5px;
+  font-size: 9px;
   color: var(--slate-muted);
   font-weight: 700;
   margin-top: 1px;
 }
 .score-rating-label {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
   color: var(--orange-dark);
-  margin-top: 2px;
+  margin-top: 1px;
   letter-spacing: 0.4px;
 }
 
@@ -1154,11 +1158,11 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .hero-status-title {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   color: var(--slate-text);
   letter-spacing: 0.5px;
@@ -1168,24 +1172,24 @@ html, body {
 .hero-status-display {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 4px 0;
+  gap: 6px;
+  margin: 2px 0;
 }
 
 .hero-status-icon {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .hero-status-text {
   font-family: var(--font-heading);
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 800;
   color: var(--safe-green);
   letter-spacing: -0.3px;
 }
 
 .hero-status-sub {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--slate-text);
   font-weight: 500;
 }
@@ -1194,23 +1198,23 @@ html, body {
 .driver-status-pills-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .status-pill-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: var(--bg-card-subtle);
   border: 1px solid var(--slate-border);
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 11.5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
 }
 
 .pill-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--safe-green);
   flex-shrink: 0;
@@ -1231,10 +1235,10 @@ html, body {
 
 /* ─── 2. Drowsiness & Distraction Detection Panels ────────────────── */
 .detection-body {
-  padding: 14px 18px;
+  padding: 8px 14px 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .det-main {
