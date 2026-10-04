@@ -32,6 +32,13 @@ import time
 import traceback
 from pathlib import Path
 
+# Silence TensorFlow noise before any imports that load TF
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+import warnings
+warnings.filterwarnings("ignore")
+
 # Fix Windows console encoding for Unicode characters
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     try:
