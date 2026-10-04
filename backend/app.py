@@ -81,8 +81,8 @@ ALARM_SECONDS           = 2.0  # OR this many seconds of continuous state
 # ---------------------------------------------------------------------------
 def _check_model(path: Path, label: str) -> None:
     if not path.exists():
-        print(f"\n[FATAL] {label} not found:\n  {path}")
-        print("  -> Place the model file in the models/ directory and restart.\n")
+        print(f"Model not found: {label}")
+        print(f"Expected at: {path}")
         sys.exit(1)
 
 _check_model(DROWSINESS_MODEL,  "Drowsiness model (best_finetuned.keras)")
