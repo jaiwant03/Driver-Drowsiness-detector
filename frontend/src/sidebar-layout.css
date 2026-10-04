@@ -1382,12 +1382,16 @@
 
 /* ── Current Detection Status ────────────────────────────────── */
 .db-section-heading {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
-  color: #0F172A;
-  margin: 18px 0 0 0;
-  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+  background: linear-gradient(135deg, #0A1128 0%, #0284C7 38%, #0D9488 72%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 20px 0 0 0;
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
   letter-spacing: -0.3px;
+  display: inline-block;
 }
 
 .db-detect-grid {
@@ -1427,16 +1431,19 @@
 }
 
 .db-detect-label {
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 700;
   color: #0F172A;
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+  letter-spacing: -0.2px;
 }
 
 .db-detect-status {
-  font-size: 25px;
+  font-size: 26px;
   font-weight: 800;
   margin-bottom: 4px;
-  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+  letter-spacing: -0.4px;
   position: relative;
   z-index: 2;
 }
@@ -1455,6 +1462,7 @@
   font-size: 13.5px;
   font-weight: 500;
   color: #64748B;
+  font-family: "Outfit", sans-serif;
   position: relative;
   z-index: 2;
 }
