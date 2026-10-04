@@ -20,7 +20,7 @@ export function LiveMonitor({
   onSnapshot,
 }) {
   return (
-    <div className="tab-page active" id="tabLive">
+    <div className="live-monitor-section-wrap">
       <div className="live-console-grid">
         {/* Left Column (~60% width): Large Live Camera Feed & Viewfinder */}
         <section className="camera-col">

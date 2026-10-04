@@ -2,29 +2,34 @@ import React from "react";
 
 export function AlertsTab({ alertHistory, onClear, onOpenGallery, snapshotCount }) {
   return (
-    <div className="tab-page active" id="tabAlerts">
-      <div className="tab-page-container">
-        <div className="panel full-height-panel">
-          <div className="panel-header">
-            <div className="panel-title">
-              <h2>Complete Session Alert &amp; Event Log</h2>
-              <span className="hdr-tag">{alertHistory.length} Recorded Events</span>
-            </div>
-            <div className="header-badges">
-              {snapshotCount > 0 && (
-                <button className="btn btn-secondary btn-ctrl" onClick={onOpenGallery}>
-                  View Snapshots ({snapshotCount})
-                </button>
-              )}
-              <button
-                className="btn btn-secondary btn-ctrl"
-                onClick={onClear}
-                disabled={alertHistory.length === 0}
-              >
-                Clear Log
-              </button>
-            </div>
+    <div className="alerts-section-wrap">
+      <div className="section-title-bar">
+        <div className="section-title-left">
+          <span className="section-icon-badge">🚨</span>
+          <div>
+            <h2>Alert History &amp; Event Telemetry Log</h2>
+            <p className="section-sub">
+              Chronological audit history of fatigue warnings, eye state changes, and distraction episodes
+            </p>
           </div>
+        </div>
+        <div className="header-badges">
+          {snapshotCount > 0 && (
+            <button className="btn btn-secondary btn-ctrl" onClick={onOpenGallery}>
+              View Snapshots ({snapshotCount})
+            </button>
+          )}
+          <button
+            className="btn btn-secondary btn-ctrl"
+            onClick={onClear}
+            disabled={alertHistory.length === 0}
+          >
+            Clear Log
+          </button>
+        </div>
+      </div>
+
+      <div className="panel full-height-panel">
 
           <div className="full-alert-table-wrap">
             <table className="cc-table" id="fullAlertsTable">

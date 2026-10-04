@@ -38,8 +38,21 @@ export function AnalyticsTab({
   const distractTop = distractionData?.top_classes || [];
 
   return (
-    <div className="tab-page active" id="tabAnalytics">
-      <div className="tab-page-container">
+    <div className="analytics-section-wrap">
+      <div className="section-title-bar">
+        <div className="section-title-left">
+          <span className="section-icon-badge">📊</span>
+          <div>
+            <h2>Real-Time Fleet Analytics &amp; Behavior Insights</h2>
+            <p className="section-sub">
+              Cumulative inference metrics, detection distribution, and temporal alertness tracking
+            </p>
+          </div>
+        </div>
+        <span className="badge-tag">Telemetry Analytics</span>
+      </div>
+
+      <div className="analytics-content-flow">
         {/* 4 Large Overview Metric Tiles */}
         <div className="analytics-tiles-grid">
           <div className="ana-tile">
