@@ -1305,57 +1305,84 @@ function resetUI() {
   state.alertHistory      = [];
   state.snapshots         = [];
 
-  el.sessionTimer.textContent = "00:00:00";
-  el.scoreValue.textContent = "100";
-  el.scoreLabel.textContent = "EXCELLENT";
-  el.scoreRingFill.style.strokeDashoffset = "0";
-  el.scoreRingFill.style.stroke = "#10B981";
+  if (el.sessionTimer) el.sessionTimer.textContent = "00:00:00";
+  if (el.scoreValue) el.scoreValue.textContent = "100";
+  if (el.scoreLabel) el.scoreLabel.textContent = "EXCELLENT";
+  if (el.scoreRingFill) {
+    el.scoreRingFill.style.strokeDashoffset = "0";
+    el.scoreRingFill.style.stroke = "#F97316";
+  }
 
-  setBadge(el.drowsinessBadge, "WAITING", "");
-  el.drowsinessIcon.textContent = "?";
-  el.drowsinessIcon.className = "det-icon mini-icon";
-  el.drowsinessLabel.textContent = "Waiting…";
-  el.drowsinessRaw.textContent = "Raw: —";
-  el.drowsinessConf.textContent = "0%";
-  setBar(el.drowsinessBar, 0, "prog-fill");
+  /* Reset Hero Status in Score Card */
+  const heroText = $("heroStatusText");
+  const heroIcon = $("heroStatusIcon");
+  const heroSub  = $("heroStatusSub");
+  if (heroText) {
+    heroText.textContent = "ALERT";
+    heroText.style.color = "var(--safe-green)";
+  }
+  if (heroIcon) heroIcon.textContent = "🟢";
+  if (heroSub) heroSub.textContent = "Driver is attentive and fully responsive";
+
+  /* Reset Drowsiness Panel */
+  if (el.drowsinessBadge) setBadge(el.drowsinessBadge, "WAITING", "badge-safe");
+  if (el.drowsinessIcon) {
+    el.drowsinessIcon.textContent = "✓";
+    el.drowsinessIcon.className = "det-icon safe";
+  }
+  if (el.drowsinessLabel) el.drowsinessLabel.textContent = "Waiting for stream…";
+  if (el.drowsinessRaw) el.drowsinessRaw.textContent = "Raw: —";
+  if (el.drowsinessConf) el.drowsinessConf.textContent = "0.0%";
+  if (el.drowsinessBar) setBar(el.drowsinessBar, 0, "prog-fill");
   setProbRow("pClosed", "bClosed", 0, true);
   setProbRow("pOpen", "bOpen", 0, false);
   setProbRow("pNoYawn", "bNoYawn", 0, false);
   setProbRow("pYawn", "bYawn", 0, true);
-  el.drowsyDuration.textContent = "0.0 s";
-  el.drowsyFrames.textContent = "0";
-  el.faceDetected.textContent = "—";
+  if (el.drowsyDuration) el.drowsyDuration.textContent = "0.0s";
+  if (el.drowsyFrames) el.drowsyFrames.textContent = "0";
+  if (el.faceDetected) el.faceDetected.textContent = "—";
 
-  setBadge(el.distractionBadge, "WAITING", "");
-  el.distractionIcon.textContent = "?";
-  el.distractionIcon.className = "det-icon mini-icon";
-  el.distractionLabel.textContent = "Waiting…";
-  el.distractionRaw.textContent = "Raw: —";
-  el.distractionConf.textContent = "0%";
-  setBar(el.distractionBar, 0, "prog-fill");
+  /* Reset Distraction Panel */
+  if (el.distractionBadge) setBadge(el.distractionBadge, "WAITING", "badge-safe");
+  if (el.distractionIcon) {
+    el.distractionIcon.textContent = "✓";
+    el.distractionIcon.className = "det-icon safe";
+  }
+  if (el.distractionLabel) el.distractionLabel.textContent = "Waiting for stream…";
+  if (el.distractionRaw) el.distractionRaw.textContent = "Raw: —";
+  if (el.distractionConf) el.distractionConf.textContent = "0.0%";
+  if (el.distractionBar) setBar(el.distractionBar, 0, "prog-fill");
+
   [0, 1, 2].forEach(i => {
-    $(`top3Name${i}`).textContent = "—";
-    $(`top3Conf${i}`).textContent = "—";
-    $(`top3_${i}`).className = "top3-item compact-item";
+    const nameEl = $(`top3Name${i}`);
+    if (nameEl) nameEl.textContent = i === 0 ? "Safe Driving" : "—";
+    const confEl = $(`top3Conf${i}`);
+    if (confEl) confEl.textContent = "—";
+    const rowEl = $(`top3_${i}`);
+    if (rowEl) rowEl.className = "top3-item" + (i === 0 ? " is-top" : "");
   });
-  el.distractDuration.textContent = "0.0 s";
-  el.distractFrames.textContent = "0";
 
-  setSafetyBadge("WAITING", "");
-  setVideoStatus("WAITING", "");
+  if (el.distractDuration) el.distractDuration.textContent = "0.0s";
+  if (el.distractFrames) el.distractFrames.textContent = "0";
 
-  el.statFrames.textContent = "0";
-  el.statDrowsyEvents.textContent = "0";
-  el.statYawnEvents.textContent = "0";
-  el.statDistractEvents.textContent = "0";
-  el.statAvgConfidence.textContent = "—";
-  el.statSafety.textContent = "—";
-  el.safetyIndicatorDot.style.backgroundColor = "#94A3B8";
+  setSafetyBadge("STANDBY", "");
+  setVideoStatus("STANDBY", "");
 
-  el.inferenceTime.textContent = "— ms";
-  el.fpsValue.textContent = "— fps";
+  /* Analytics Tiles */
+  if (el.statFrames) el.statFrames.textContent = "0";
+  if (el.statDrowsyEvents) el.statDrowsyEvents.textContent = "0";
+  if (el.statYawnEvents) el.statYawnEvents.textContent = "0";
+  if (el.statDistractEvents) el.statDistractEvents.textContent = "0";
+  if (el.statAvgConfidence) el.statAvgConfidence.textContent = "—";
+  if (el.statSafety) el.statSafety.textContent = "—";
+  if (el.safetyIndicatorDot) el.safetyIndicatorDot.style.backgroundColor = "#94A3B8";
 
-  el.timelineRail.innerHTML = `<div class="timeline-event-chip chip-init"><span class="event-time">--:--:--</span><span class="event-desc">System Initialized</span></div>`;
+  if (el.inferenceTime) el.inferenceTime.textContent = "— ms";
+  if (el.fpsValue) el.fpsValue.textContent = "— fps";
+
+  if (el.timelineRail) {
+    el.timelineRail.innerHTML = `<div class="timeline-event-chip chip-safe"><span class="event-time">--:--:--</span><span class="event-desc">System Initialized &amp; Ready</span></div>`;
+  }
   renderRecentAlerts();
   updateDonutChart();
   drawTrendLine();
