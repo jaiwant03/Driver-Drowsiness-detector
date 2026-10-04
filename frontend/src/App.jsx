@@ -190,7 +190,7 @@ export default function App() {
       {/* Main Content Area */}
       <div className="main-content" ref={mainContentRef}>
         {/* Safety Alert Banner (shown only on anomaly states, non-dashboard pages) */}
-        {settings.visualEnabled && !bannerDismissed && safetyLevel !== "STANDBY" && safetyLevel !== "NORMAL" && currentPage !== "dashboard" && (
+        {settings.visualEnabled && !bannerDismissed && safetyLevel !== "STANDBY" && safetyLevel !== "SAFE" && currentPage !== "dashboard" && (
           <AlertBanner
             safetyLevel={safetyLevel}
             safetyMessage={safetyMessage}
