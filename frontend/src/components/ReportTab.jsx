@@ -34,27 +34,28 @@ export function ReportTab({
   }
 
   return (
-    <div className="tab-page active" id="tabReport">
-      <div className="tab-page-container">
-        <div className="panel report-page-panel">
-          <div className="panel-header">
-            <div className="panel-title">
-              <h2>Executive Driver Safety Report</h2>
-              <span className="hdr-tag">Fleet Safety Audit</span>
-            </div>
-            <div className="header-badges">
-              <button className="btn btn-primary btn-ctrl" onClick={onExportPDF} id="btnExportPDF">
-                Download PDF
-              </button>
-              <button
-                className="btn btn-secondary btn-ctrl"
-                onClick={onExportCSV}
-                id="btnExportCSV"
-              >
-                Export CSV
-              </button>
-            </div>
+    <div className="report-section-wrap">
+      <div className="section-title-bar">
+        <div className="section-title-left">
+          <span className="section-icon-badge">📄</span>
+          <div>
+            <h2>Executive Fleet Driver Safety Audit Report</h2>
+            <p className="section-sub">
+              Official safety compliance document with KPI summary, telemetry metrics, and driver evaluation
+            </p>
           </div>
+        </div>
+        <div className="header-badges">
+          <button className="btn btn-primary btn-ctrl" onClick={onExportPDF} id="btnExportPDF">
+            Download PDF
+          </button>
+          <button className="btn btn-secondary btn-ctrl" onClick={onExportCSV} id="btnExportCSV">
+            Export CSV
+          </button>
+        </div>
+      </div>
+
+      <div className="panel report-page-panel">
 
           <div className="report-document" id="reportDocument">
             <div className="report-doc-header">
