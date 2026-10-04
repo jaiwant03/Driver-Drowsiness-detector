@@ -263,8 +263,8 @@ let state = {
    INITIALISATION
 ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  resetUI();
   attachEventListeners();
+  resetUI();
   startHealthPoller();
   checkBackend();
   initSettings();
