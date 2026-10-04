@@ -452,7 +452,7 @@ export function AnalyticsTab({
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               </span>
-              Drowsiness Classification (MobileNetV2)
+              <span className="ap-card-title-multicolor">Drowsiness Classification (MobileNetV2)</span>
             </h2>
           </div>
 
