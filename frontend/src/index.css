@@ -1867,15 +1867,7 @@ html, body {
   place-items: center;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 99;
-}
-.btn-scroll-top:hover {
-  background: var(--orange-primary);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-orange);
-}
   z-index: 400;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-scroll-top:hover {
   background: var(--orange-primary);
