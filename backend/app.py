@@ -339,7 +339,6 @@ if __name__ == "__main__":
 
     print("=" * 70)
     print("  Backend running successfully")
-    print("  Open the frontend at http://localhost:5173")
     print("=" * 70)
     print()
 
