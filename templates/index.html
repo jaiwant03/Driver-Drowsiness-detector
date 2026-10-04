@@ -18,7 +18,7 @@
 <body class="command-center-body">
 
   <!-- ═══════════════════════════════════════════════════════════
-       1. COMPACT COMMAND CENTER HEADER (~52px)
+       1. COMPACT HEADER (~44px)
   ════════════════════════════════════════════════════════════ -->
   <header class="cc-header" role="banner">
     <div class="cc-header-container">
@@ -26,10 +26,9 @@
       <!-- Brand & Automotive Identity -->
       <div class="brand">
         <div class="brand-icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             <circle cx="12" cy="11" r="3"/>
-            <path d="m9 18 3-2 3 2"/>
           </svg>
         </div>
         <div class="brand-info">
@@ -37,54 +36,42 @@
             <h1>DriverGuard</h1>
             <span class="badge-tag">AI Telemetry</span>
           </div>
-          <span class="brand-sub">Real-Time Driver Safety Console</span>
         </div>
       </div>
 
       <!-- Navigation Tabs (Live, Analytics, Alerts, Report) -->
       <nav class="cc-nav-tabs" role="tablist" aria-label="Dashboard Views">
         <button class="nav-tab active" data-tab="live" role="tab" aria-selected="true" id="tabLiveBtn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
-          LIVE MONITOR
+          <span class="tab-dot"></span> LIVE MONITOR
         </button>
         <button class="nav-tab" data-tab="analytics" role="tab" aria-selected="false" id="tabAnalyticsBtn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           ANALYTICS
         </button>
         <button class="nav-tab" data-tab="alerts" role="tab" aria-selected="false" id="tabAlertsBtn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          ALERTS
-          <span class="tab-badge" id="alertTabCount">0</span>
+          ALERTS <span class="tab-badge" id="alertTabCount">0</span>
         </button>
         <button class="nav-tab" data-tab="report" role="tab" aria-selected="false" id="tabReportBtn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          SESSION REPORT
+          REPORT
         </button>
       </nav>
 
       <!-- Quick Control & Telemetry Bar -->
       <div class="cc-header-right">
         <!-- Voice Alert Toggle -->
-        <button class="header-action-btn" id="btnVoiceToggle" title="Toggle Voice Alerts" aria-label="Toggle Voice Alert">
-          <svg id="voiceIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>
+        <button class="header-action-btn" id="btnVoiceToggle" title="Toggle Voice Alerts">
+          <svg id="voiceIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
           <span id="voiceText">Voice: ON</span>
         </button>
 
         <!-- Focus Mode Toggle -->
-        <button class="header-action-btn" id="btnFocusMode" title="Enter Distraction-Free Focus Mode">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        <button class="header-action-btn" id="btnFocusMode" title="Focus Mode (Distraction-Free)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
           Focus
         </button>
 
         <!-- Settings Modal Trigger -->
-        <button class="header-icon-btn" id="btnOpenSettings" title="Alert & System Settings" aria-label="Settings">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
+        <button class="header-icon-btn" id="btnOpenSettings" title="Settings" aria-label="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
 
         <div class="header-divider"></div>
@@ -92,7 +79,7 @@
         <!-- Backend Online Indicator -->
         <div class="backend-status" id="backendStatus" aria-live="polite">
           <span class="status-dot" id="statusDot"></span>
-          <span id="statusText">Connecting…</span>
+          <span id="statusText">Online</span>
         </div>
 
         <!-- FPS Telemetry Badge -->
@@ -106,12 +93,12 @@
 
 
   <!-- ═══════════════════════════════════════════════════════════
-       2. COMPACT DYNAMIC SAFETY ALERT BAR (~32px)
+       2. COMPACT DYNAMIC SAFETY ALERT BAR (~26px)
   ════════════════════════════════════════════════════════════ -->
   <div class="alert-bar-strip">
     <div class="alert-banner" id="alertBanner" role="alert" aria-live="assertive" hidden>
       <div class="alert-strip-content">
-        <span class="alert-strip-badge" id="alertStripBadge">SAFETY ALERT</span>
+        <span class="alert-strip-badge" id="alertStripBadge">ALERT</span>
         <span id="alertBannerText" class="alert-strip-text">Driver attention monitored.</span>
       </div>
       <button class="alert-banner-close" id="alertBannerClose" aria-label="Dismiss alert">✕</button>
@@ -120,7 +107,7 @@
 
 
   <!-- ═══════════════════════════════════════════════════════════
-       3. MAIN HORIZONTAL COMMAND CENTER VIEWPORT
+       3. MAIN VIEWPORT (STRICT 100vh SINGLE SCREEN DESKTOP FIT)
   ════════════════════════════════════════════════════════════ -->
   <main class="cc-viewport" id="dashboard">
 
@@ -129,10 +116,10 @@
     ────────────────────────────────────────────────────────── -->
     <div class="tab-page active" id="tabLive">
 
-      <!-- ── ROW 1: PRIMARY MONITORING ROW ── -->
+      <!-- ── ROW 1: PRIMARY MONITORING ROW (FLEX 1.35) ── -->
       <section class="cc-row cc-monitoring-row">
 
-        <!-- 1. LIVE CAMERA CARD (~46% WIDTH) -->
+        <!-- 1. LIVE CAMERA CARD (~46% WIDTH - LARGEST ELEMENT) -->
         <div class="panel camera-panel" aria-label="Live Camera Feed">
           <div class="panel-header compact-hdr">
             <div class="panel-title">
@@ -143,8 +130,8 @@
             <div class="header-badges">
               <span class="live-pill" id="livePill"><span class="live-indicator"></span> LIVE</span>
               <span class="safety-badge" id="safetyBadge">WAITING</span>
-              <button class="btn-icon-ghost" id="btnFullscreen" title="Fullscreen Camera" aria-label="Fullscreen">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+              <button class="btn-icon-ghost" id="btnFullscreen" title="Fullscreen Camera">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
               </button>
             </div>
           </div>
@@ -166,8 +153,8 @@
 
               <!-- Top Telemetry Chips Over Camera -->
               <div class="cam-overlay-top">
-                <span class="cam-tag" id="camResTag">640×480 • AI PIPELINE</span>
-                <span class="cam-tag tag-face" id="camFaceTag">FACE: DETECTING</span>
+                <span class="cam-tag" id="camResTag">640×480 • AI STREAM</span>
+                <span class="cam-tag tag-face" id="camFaceTag">FACE: TRACKED</span>
               </div>
 
               <!-- Bottom Status Chips Over Camera -->
@@ -182,7 +169,7 @@
               <!-- Standby Camera Placeholder -->
               <div class="camera-placeholder" id="cameraPlaceholder">
                 <div class="placeholder-icon-wrap">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="3"/><circle cx="9" cy="12" r="2.5"/></svg>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="3"/><circle cx="9" cy="12" r="2.5"/></svg>
                 </div>
                 <p class="placeholder-title">Camera Feed Standby</p>
                 <p class="placeholder-sub">Click <strong>Start Monitoring</strong> to initiate real-time AI safety detection</p>
@@ -194,25 +181,24 @@
           <div class="camera-controls-strip">
             <div class="controls-left">
               <button class="btn btn-primary btn-sm" id="btnStart">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                Start Monitoring
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Start
               </button>
               <button class="btn btn-stop btn-sm" id="btnStop" disabled>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
                 Stop
               </button>
               <button class="btn btn-secondary btn-sm" id="btnReset">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                 Reset
               </button>
             </div>
             <div class="controls-right">
-              <button class="btn btn-secondary btn-sm btn-snapshot" id="btnCaptureSnapshot" title="Capture Snapshot of current frame">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <button class="btn btn-secondary btn-sm" id="btnCaptureSnapshot" title="Capture Snapshot of current frame">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 Snapshot
               </button>
               <span class="session-timer-pill" id="sessionTimerBadge">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span id="sessionTimer">00:00:00</span>
               </span>
             </div>
@@ -220,19 +206,19 @@
         </div>
 
 
-        <!-- 2. DRIVER SAFETY SCORE & CURRENT STATUS (~18% WIDTH) -->
+        <!-- 2. DRIVER SAFETY SCORE & CURRENT STATUS (~18% WIDTH - SECOND MOST VISUAL) -->
         <div class="panel score-panel" aria-label="Driver Safety Score">
           <div class="panel-header compact-hdr">
             <h2>SAFETY SCORE</h2>
-            <span class="badge-tag">Dynamic AI</span>
+            <span class="badge-tag">AI Dynamic</span>
           </div>
 
           <div class="score-card-body">
-            <!-- Circular SVG Score Ring -->
+            <!-- Circular SVG Score Ring (Compact 72px) -->
             <div class="score-ring-container">
               <svg class="score-ring-svg" viewBox="0 0 120 120">
-                <circle class="ring-bg" cx="60" cy="60" r="50" stroke="#EEF2F6" stroke-width="9" fill="none" />
-                <circle class="ring-fill" id="scoreRingFill" cx="60" cy="60" r="50" stroke="#10B981" stroke-width="9" fill="none"
+                <circle class="ring-bg" cx="60" cy="60" r="50" stroke="#EEF2F6" stroke-width="10" fill="none" />
+                <circle class="ring-fill" id="scoreRingFill" cx="60" cy="60" r="50" stroke="#10B981" stroke-width="10" fill="none"
                         stroke-dasharray="314.16" stroke-dashoffset="0" stroke-linecap="round" />
               </svg>
               <div class="score-center-text">
@@ -242,9 +228,8 @@
               </div>
             </div>
 
-            <!-- Current Driver Status Grid -->
+            <!-- Current Driver Status Badges -->
             <div class="driver-status-group">
-              <span class="micro-header">CURRENT DRIVER STATUS</span>
               <div class="status-indicator-pills">
                 <div class="status-pill-item" id="pillEyes">
                   <div class="pill-icon-dot safe"></div>
@@ -273,11 +258,11 @@
         </div>
 
 
-        <!-- 3. DROWSINESS DETECTION PANEL (~18% WIDTH) -->
+        <!-- 3. COMPACT DROWSINESS PANEL (~18% WIDTH) -->
         <div class="panel detection-panel compact-panel" id="drowsinessPanel" aria-label="Drowsiness Detection">
           <div class="panel-header compact-hdr">
             <div class="panel-title">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0EA5A4" stroke-width="2.2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0EA5A4" stroke-width="2.2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               <h2>DROWSINESS</h2>
             </div>
             <div class="detection-badge" id="drowsinessBadge">WAITING</div>
@@ -299,7 +284,7 @@
                 <span class="metric-name">CONFIDENCE</span>
                 <strong class="metric-value" id="drowsinessConf">0.0%</strong>
               </div>
-              <div class="prog-track sm">
+              <div class="prog-track xs">
                 <div class="prog-fill" id="drowsinessBar" style="width:0%"></div>
               </div>
             </div>
@@ -307,11 +292,11 @@
             <!-- Class Probabilities 2x2 Mini Grid -->
             <div class="prob-grid compact-grid" id="drowsinessProbs">
               <div class="prob-item">
-                <div class="prob-row"><span>Eyes Closed</span><strong id="pClosed">0.0%</strong></div>
+                <div class="prob-row"><span>Closed</span><strong id="pClosed">0.0%</strong></div>
                 <div class="prog-track xs"><div class="prog-fill drowsy-fill" id="bClosed" style="width:0%"></div></div>
               </div>
               <div class="prob-item">
-                <div class="prob-row"><span>Eyes Open</span><strong id="pOpen">0.0%</strong></div>
+                <div class="prob-row"><span>Open</span><strong id="pOpen">0.0%</strong></div>
                 <div class="prog-track xs"><div class="prog-fill alert-fill" id="bOpen" style="width:0%"></div></div>
               </div>
               <div class="prob-item">
@@ -327,8 +312,8 @@
             <!-- Drowsiness Timers (3 Mini Columns) -->
             <div class="timer-row timer-row-3 compact-timers">
               <div class="timer-cell">
-                <span class="timer-label">Duration</span>
-                <strong id="drowsyDuration">0.0 s</strong>
+                <span class="timer-label">Dur.</span>
+                <strong id="drowsyDuration">0.0s</strong>
               </div>
               <div class="timer-cell">
                 <span class="timer-label">Frames</span>
@@ -343,11 +328,11 @@
         </div>
 
 
-        <!-- 4. DISTRACTION DETECTION PANEL (~18% WIDTH) -->
+        <!-- 4. COMPACT DISTRACTION PANEL (~18% WIDTH) -->
         <div class="panel detection-panel compact-panel" id="distractionPanel" aria-label="Distraction Detection">
           <div class="panel-header compact-hdr">
             <div class="panel-title">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="M12 12v9"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="M12 12v9"/><circle cx="12" cy="12" r="3"/></svg>
               <h2>DISTRACTION</h2>
             </div>
             <div class="detection-badge" id="distractionBadge">WAITING</div>
@@ -369,7 +354,7 @@
                 <span class="metric-name">CONFIDENCE</span>
                 <strong class="metric-value" id="distractionConf">0.0%</strong>
               </div>
-              <div class="prog-track sm">
+              <div class="prog-track xs">
                 <div class="prog-fill" id="distractionBar" style="width:0%"></div>
               </div>
             </div>
@@ -399,7 +384,7 @@
             <div class="timer-row timer-row-2 compact-timers">
               <div class="timer-cell">
                 <span class="timer-label">Duration</span>
-                <strong id="distractDuration">0.0 s</strong>
+                <strong id="distractDuration">0.0s</strong>
               </div>
               <div class="timer-cell">
                 <span class="timer-label">Frames</span>
@@ -412,38 +397,38 @@
       </section>
 
 
-      <!-- ── ROW 2: SECONDARY ANALYTICS & RECENT ALERTS ROW ── -->
+      <!-- ── ROW 2: SECONDARY ANALYTICS ROW (FLEX 1.0) ── -->
       <section class="cc-row cc-analytics-row">
 
         <!-- 1. SESSION OVERVIEW TILE MATRIX (~32% WIDTH) -->
         <div class="panel session-stats-panel" aria-label="Session Overview">
           <div class="panel-header compact-hdr">
             <h2>SESSION OVERVIEW</h2>
-            <span class="hdr-tag">Cumulative Telemetry</span>
+            <span class="hdr-tag">Telemetry</span>
           </div>
           <div class="stats-matrix-body">
             <div class="stat-tile">
-              <span class="tile-label">FRAMES ANALYSED</span>
+              <span class="tile-label">FRAMES</span>
               <strong class="tile-val" id="statFrames">0</strong>
             </div>
             <div class="stat-tile tile-drowsy">
-              <span class="tile-label">DROWSY EVENTS</span>
+              <span class="tile-label">DROWSY</span>
               <strong class="tile-val" id="statDrowsyEvents">0</strong>
             </div>
             <div class="stat-tile tile-yawn">
-              <span class="tile-label">YAWN EVENTS</span>
+              <span class="tile-label">YAWNS</span>
               <strong class="tile-val" id="statYawnEvents">0</strong>
             </div>
             <div class="stat-tile tile-distract">
-              <span class="tile-label">DISTRACTIONS</span>
+              <span class="tile-label">DISTRACT</span>
               <strong class="tile-val" id="statDistractEvents">0</strong>
             </div>
             <div class="stat-tile">
-              <span class="tile-label">AVG CONFIDENCE</span>
+              <span class="tile-label">AVG CONF.</span>
               <strong class="tile-val" id="statAvgConfidence">—</strong>
             </div>
             <div class="stat-tile tile-safety">
-              <span class="tile-label">SAFETY LEVEL</span>
+              <span class="tile-label">SAFETY</span>
               <div class="safety-indicator-line">
                 <span class="safety-indicator-dot" id="safetyIndicatorDot"></span>
                 <strong class="tile-val" id="statSafety">—</strong>
@@ -453,10 +438,10 @@
         </div>
 
 
-        <!-- 2. DETECTION DISTRIBUTION & ALERTNESS TREND (~36% WIDTH) -->
+        <!-- 2. DETECTION DISTRIBUTION & ALERTNESS TREND (~38% WIDTH) -->
         <div class="panel charts-panel" aria-label="Visual Analytics">
           <div class="panel-header compact-hdr">
-            <h2>DISTRIBUTION &amp; ALERTNESS TREND</h2>
+            <h2>DISTRIBUTION &amp; TREND</h2>
             <div class="chart-legend-row">
               <span class="legend-item"><span class="legend-dot dot-safe"></span>Safe</span>
               <span class="legend-item"><span class="legend-dot dot-warn"></span>Yawn</span>
@@ -465,7 +450,7 @@
             </div>
           </div>
           <div class="dual-charts-body">
-            <!-- Compact Donut Chart -->
+            <!-- Compact Donut Chart (54px) -->
             <div class="chart-box-donut">
               <svg class="donut-svg" viewBox="0 0 100 100" id="donutChartSvg">
                 <circle cx="50" cy="50" r="38" class="donut-bg" stroke="#F1F5F9" stroke-width="12" fill="none" />
@@ -475,16 +460,15 @@
                 <circle cx="50" cy="50" r="38" id="donutDistract" class="donut-seg seg-distract" stroke="#3B82F6" stroke-width="12" fill="none" stroke-dasharray="238.76" stroke-dashoffset="238.76" />
               </svg>
               <div class="donut-legend-counts">
-                <div class="donut-cnt-item"><span class="cnt-lbl">Eyes Open:</span> <strong id="cntEyesOpen">0</strong></div>
-                <div class="donut-cnt-item"><span class="cnt-lbl">Closed:</span> <strong id="cntEyesClosed">0</strong></div>
-                <div class="donut-cnt-item"><span class="cnt-lbl">Yawns:</span> <strong id="cntYawns">0</strong></div>
-                <div class="donut-cnt-item"><span class="cnt-lbl">Distract:</span> <strong id="cntDistractions">0</strong></div>
+                <div class="donut-cnt-item"><span>Open:</span> <strong id="cntEyesOpen">0</strong></div>
+                <div class="donut-cnt-item"><span>Closed:</span> <strong id="cntEyesClosed">0</strong></div>
+                <div class="donut-cnt-item"><span>Yawns:</span> <strong id="cntYawns">0</strong></div>
+                <div class="donut-cnt-item"><span>Dist.:</span> <strong id="cntDistractions">0</strong></div>
               </div>
             </div>
 
             <!-- Trend Sparkline -->
             <div class="chart-box-trend">
-              <span class="micro-header">ALERTNESS TIMELINE TREND</span>
               <div class="trend-canvas-wrap">
                 <svg class="trend-svg" id="trendLineSvg" preserveAspectRatio="none" viewBox="0 0 300 60">
                   <path id="trendArea" d="M 0 60 L 0 30 L 300 30 L 300 60 Z" fill="rgba(37,99,235,0.08)" />
@@ -492,7 +476,7 @@
                 </svg>
               </div>
               <div class="trend-footer-tags">
-                <span>Session Start</span>
+                <span>Start</span>
                 <span id="trendCurrentScoreTag">Score: 100</span>
                 <span>Now</span>
               </div>
@@ -501,17 +485,15 @@
         </div>
 
 
-        <!-- 3. RECENT ALERT HISTORY PANEL (~32% WIDTH) -->
+        <!-- 3. RECENT ALERT HISTORY PANEL (~30% WIDTH) -->
         <div class="panel alert-history-panel" aria-label="Recent Alerts">
           <div class="panel-header compact-hdr">
             <h2>ALERT HISTORY</h2>
             <button class="btn-ghost-sm" id="btnViewAllAlerts">View All</button>
           </div>
           <div class="alert-history-body" id="alertHistoryList">
-            <!-- Dynamic recent alert items populated via JavaScript -->
             <div class="history-empty" id="historyEmptyState">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span>No critical alert events recorded in this session.</span>
+              <span>No critical alert events recorded in session.</span>
             </div>
           </div>
         </div>
@@ -519,17 +501,16 @@
       </section>
 
 
-      <!-- ── ROW 3: HORIZONTAL LIVE DETECTION TIMELINE STRIP ── -->
+      <!-- ── ROW 3: HORIZONTAL LIVE DETECTION TIMELINE STRIP (~28px) ── -->
       <section class="cc-timeline-strip" aria-label="Live Detection Timeline">
         <div class="timeline-label-col">
           <span class="live-dot-pulse"></span>
-          <span>LIVE TIMELINE</span>
+          <span>TIMELINE</span>
         </div>
         <div class="timeline-rail" id="timelineRail">
-          <!-- Horizontal stream of latest 6-8 events populated dynamically -->
           <div class="timeline-event-chip chip-init">
             <span class="event-time">--:--:--</span>
-            <span class="event-desc">System Initialized</span>
+            <span class="event-desc">System Ready</span>
           </div>
         </div>
       </section>
@@ -547,9 +528,7 @@
             <div class="panel-header"><h2>Drowsiness Classification Distribution</h2></div>
             <div class="analytics-card-content">
               <p class="analytics-sub">Cumulative probability weights across 4 MobileNetV2 classes</p>
-              <div class="analytics-stat-bars" id="analyticsDrowsyBars">
-                <!-- Injected via app.js -->
-              </div>
+              <div class="analytics-stat-bars" id="analyticsDrowsyBars"></div>
             </div>
           </div>
 
@@ -557,9 +536,7 @@
             <div class="panel-header"><h2>Distraction Behavior Distribution</h2></div>
             <div class="analytics-card-content">
               <p class="analytics-sub">Occurrence frequency across 10 ResNet-18 state classes</p>
-              <div class="analytics-stat-bars" id="analyticsDistractBars">
-                <!-- Injected via app.js -->
-              </div>
+              <div class="analytics-stat-bars" id="analyticsDistractBars"></div>
             </div>
           </div>
         </div>
@@ -587,7 +564,7 @@
                   <th>Severity</th>
                   <th>Detection Type</th>
                   <th>Confidence</th>
-                  <th>Driver Safety Score</th>
+                  <th>Safety Score</th>
                   <th>Snapshot</th>
                 </tr>
               </thead>
@@ -610,14 +587,8 @@
           <div class="panel-header">
             <h2>Executive Driver Safety Report</h2>
             <div class="header-badges">
-              <button class="btn btn-primary btn-sm" id="btnExportPDF">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Download PDF
-              </button>
-              <button class="btn btn-secondary btn-sm" id="btnExportCSV">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
-                Export CSV
-              </button>
+              <button class="btn btn-primary btn-sm" id="btnExportPDF">Download PDF</button>
+              <button class="btn btn-secondary btn-sm" id="btnExportCSV">Export CSV</button>
             </div>
           </div>
 
@@ -634,30 +605,12 @@
             </div>
 
             <div class="report-kpi-grid">
-              <div class="report-kpi-box">
-                <span>Total Monitoring Time</span>
-                <strong id="repTime">00:00:00</strong>
-              </div>
-              <div class="report-kpi-box">
-                <span>Total Frames Analysed</span>
-                <strong id="repFrames">0</strong>
-              </div>
-              <div class="report-kpi-box">
-                <span>Final Safety Score</span>
-                <strong id="repScore">100 / 100</strong>
-              </div>
-              <div class="report-kpi-box">
-                <span>Drowsy Events</span>
-                <strong id="repDrowsy">0</strong>
-              </div>
-              <div class="report-kpi-box">
-                <span>Yawn Events</span>
-                <strong id="repYawns">0</strong>
-              </div>
-              <div class="report-kpi-box">
-                <span>Distraction Events</span>
-                <strong id="repDistract">0</strong>
-              </div>
+              <div class="report-kpi-box"><span>Duration</span><strong id="repTime">00:00:00</strong></div>
+              <div class="report-kpi-box"><span>Frames</span><strong id="repFrames">0</strong></div>
+              <div class="report-kpi-box"><span>Final Score</span><strong id="repScore">100 / 100</strong></div>
+              <div class="report-kpi-box"><span>Drowsy Events</span><strong id="repDrowsy">0</strong></div>
+              <div class="report-kpi-box"><span>Yawn Events</span><strong id="repYawns">0</strong></div>
+              <div class="report-kpi-box"><span>Distraction Events</span><strong id="repDistract">0</strong></div>
             </div>
 
             <div class="report-summary-text">
@@ -673,7 +626,7 @@
 
 
   <!-- ═══════════════════════════════════════════════════════════
-       4. COMPACT SYSTEM STATUS FOOTER STRIP (~32px)
+       4. COMPACT SYSTEM STATUS FOOTER (~24px)
   ════════════════════════════════════════════════════════════ -->
   <footer class="cc-footer" role="contentinfo">
     <div class="cc-footer-left">
@@ -687,8 +640,6 @@
       <span>Latency: <strong id="inferenceTime">— ms</strong></span>
       <span class="sep">•</span>
       <span>Classes: <strong id="statModels">4 + 10</strong></span>
-      <span class="sep">•</span>
-      <span>Gateway: <code>http://127.0.0.1:5000</code></span>
     </div>
   </footer>
 
@@ -804,11 +755,11 @@
   </div>
 
 
-  <!-- (D) EMERGENT ALARM MODAL (ORIGINAL POPUP) -->
+  <!-- (D) EMERGENT ALARM MODAL -->
   <div class="alarm-backdrop" id="alarmBackdrop" role="dialog" aria-modal="true" aria-labelledby="alarmTitle" hidden>
     <div class="alarm-modal">
       <div class="alarm-pulse" aria-hidden="true">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       </div>
       <h2 id="alarmTitle">SAFETY ALERT DETECTED</h2>
       <p id="alarmBody">Driver attention warning detected. Please stay attentive on the road.</p>
@@ -816,9 +767,9 @@
     </div>
   </div>
 
-  <!-- Focus Mode Exit Button (Only visible during Focus Mode) -->
+  <!-- Focus Mode Exit Button -->
   <button class="btn-exit-focus" id="btnExitFocus" hidden>
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     Exit Focus Mode
   </button>
 
