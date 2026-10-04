@@ -47,7 +47,7 @@ export function SettingsPage({ settings, setSettings }) {
             SYSTEM ACTIVE
           </span>
           <button className="ap-btn ap-btn-secondary" onClick={resetDefaults}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               <path d="M3 3v5h5" />
             </svg>
@@ -94,12 +94,12 @@ export function SettingsPage({ settings, setSettings }) {
           <div className="ap-card-header">
             <h2 className="ap-card-title">
               <span className="ap-card-title-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                   <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
               </span>
-              Monitoring &amp; Alert Preferences
+              <span className="ap-card-title-multicolor">Monitoring &amp; Alert Preferences</span>
             </h2>
             <span className="ap-card-badge">Alert Engine</span>
           </div>
@@ -110,16 +110,18 @@ export function SettingsPage({ settings, setSettings }) {
               <span className="ap-setting-title">Spoken Voice Warnings</span>
               <span className="ap-setting-sub">Real-time synthesized speech warnings during critical fatigue or sleep events</span>
             </div>
-            <button
-              className={`ap-switch ${settings.voiceEnabled ? "active" : ""}`}
-              onClick={() => toggleSetting("voiceEnabled")}
-              role="switch"
-              aria-checked={settings.voiceEnabled}
-              aria-label="Toggle spoken voice warnings"
-            >
-              <span className="ap-switch-track" />
-              <span className="ap-switch-thumb" />
-            </button>
+            <div className="ap-setting-control">
+              <button
+                className={`ap-switch ${settings.voiceEnabled ? "active" : ""}`}
+                onClick={() => toggleSetting("voiceEnabled")}
+                role="switch"
+                aria-checked={settings.voiceEnabled}
+                aria-label="Toggle spoken voice warnings"
+              >
+                <span className="ap-switch-track" />
+                <span className="ap-switch-thumb" />
+              </button>
+            </div>
           </div>
 
           {/* Setting Row: Visual Alerts */}
@@ -128,16 +130,18 @@ export function SettingsPage({ settings, setSettings }) {
               <span className="ap-setting-title">On-Screen Visual Banners</span>
               <span className="ap-setting-sub">High-contrast alert banners on top of the dashboard and live monitoring view</span>
             </div>
-            <button
-              className={`ap-switch ${settings.visualEnabled ? "active" : ""}`}
-              onClick={() => toggleSetting("visualEnabled")}
-              role="switch"
-              aria-checked={settings.visualEnabled}
-              aria-label="Toggle on-screen visual banners"
-            >
-              <span className="ap-switch-track" />
-              <span className="ap-switch-thumb" />
-            </button>
+            <div className="ap-setting-control">
+              <button
+                className={`ap-switch ${settings.visualEnabled ? "active" : ""}`}
+                onClick={() => toggleSetting("visualEnabled")}
+                role="switch"
+                aria-checked={settings.visualEnabled}
+                aria-label="Toggle on-screen visual banners"
+              >
+                <span className="ap-switch-track" />
+                <span className="ap-switch-thumb" />
+              </button>
+            </div>
           </div>
 
           {/* Setting Row: Critical Modal */}
@@ -146,16 +150,18 @@ export function SettingsPage({ settings, setSettings }) {
               <span className="ap-setting-title">Critical Emergency Modal</span>
               <span className="ap-setting-sub">Full-screen flashing takeover modal requiring driver acknowledgement during hazardous events</span>
             </div>
-            <button
-              className={`ap-switch ${settings.criticalEnabled ? "active" : ""}`}
-              onClick={() => toggleSetting("criticalEnabled")}
-              role="switch"
-              aria-checked={settings.criticalEnabled}
-              aria-label="Toggle critical emergency modal"
-            >
-              <span className="ap-switch-track" />
-              <span className="ap-switch-thumb" />
-            </button>
+            <div className="ap-setting-control">
+              <button
+                className={`ap-switch ${settings.criticalEnabled ? "active" : ""}`}
+                onClick={() => toggleSetting("criticalEnabled")}
+                role="switch"
+                aria-checked={settings.criticalEnabled}
+                aria-label="Toggle critical emergency modal"
+              >
+                <span className="ap-switch-track" />
+                <span className="ap-switch-thumb" />
+              </button>
+            </div>
           </div>
 
           {/* Setting Row: Volume Slider */}
@@ -164,23 +170,25 @@ export function SettingsPage({ settings, setSettings }) {
               <span className="ap-setting-title">Alert Sound Volume</span>
               <span className="ap-setting-sub">Master volume level for acoustic sirens and synthesized voice alerts</span>
             </div>
-            <div className="ap-volume-wrap">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007C83" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-              </svg>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={settings.volume}
-                onChange={handleVolumeChange}
-                className="ap-volume-slider"
-                aria-label="Alert volume level"
-              />
-              <span className="ap-volume-pct-pill">{Math.round(settings.volume * 100)}%</span>
+            <div className="ap-setting-control">
+              <div className="ap-volume-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007C83" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={settings.volume}
+                  onChange={handleVolumeChange}
+                  className="ap-volume-slider"
+                  aria-label="Alert volume level"
+                />
+                <span className="ap-volume-pct-pill">{Math.round(settings.volume * 100)}%</span>
+              </div>
             </div>
           </div>
         </div>
@@ -190,11 +198,11 @@ export function SettingsPage({ settings, setSettings }) {
           <div className="ap-card-header">
             <h2 className="ap-card-title">
               <span className="ap-card-title-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
               </span>
-              AI Detection Sensitivity &amp; Thresholds
+              <span className="ap-card-title-multicolor">AI Detection Sensitivity &amp; Thresholds</span>
             </h2>
             <span className="ap-card-badge">Neural Filter</span>
           </div>
@@ -205,17 +213,19 @@ export function SettingsPage({ settings, setSettings }) {
               <span className="ap-setting-title">Fatigue Classifier Sensitivity</span>
               <span className="ap-setting-sub">EAR (Eye Aspect Ratio) trigger strictness and temporal closure threshold</span>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {["Conservative", "Balanced", "Strict"].map((lvl) => (
-                <button
-                  key={lvl}
-                  className={`ap-btn ${sensitivity === lvl ? "ap-btn-primary" : "ap-btn-secondary"}`}
-                  style={{ padding: "6px 14px", fontSize: "12.5px" }}
-                  onClick={() => setSensitivity(lvl)}
-                >
-                  {lvl}
-                </button>
-              ))}
+            <div className="ap-setting-control">
+              <div style={{ display: "flex", gap: "8px" }}>
+                {["Conservative", "Balanced", "Strict"].map((lvl) => (
+                  <button
+                    key={lvl}
+                    className={`ap-btn ${sensitivity === lvl ? "ap-btn-primary" : "ap-btn-secondary"}`}
+                    style={{ padding: "5px 13px", fontSize: "12px" }}
+                    onClick={() => setSensitivity(lvl)}
+                  >
+                    {lvl}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -225,17 +235,19 @@ export function SettingsPage({ settings, setSettings }) {
               <span className="ap-setting-title">Distraction Gaze Timeout</span>
               <span className="ap-setting-sub">Maximum continuous duration driver may look away from the road before warning triggers</span>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {["1.5s", "2.5s", "4.0s"].map((time) => (
-                <button
-                  key={time}
-                  className={`ap-btn ${gazeThreshold === time ? "ap-btn-primary" : "ap-btn-secondary"}`}
-                  style={{ padding: "6px 14px", fontSize: "12.5px" }}
-                  onClick={() => setGazeThreshold(time)}
-                >
-                  {time}
-                </button>
-              ))}
+            <div className="ap-setting-control">
+              <div style={{ display: "flex", gap: "8px" }}>
+                {["1.5s", "2.5s", "4.0s"].map((time) => (
+                  <button
+                    key={time}
+                    className={`ap-btn ${gazeThreshold === time ? "ap-btn-primary" : "ap-btn-secondary"}`}
+                    style={{ padding: "5px 13px", fontSize: "12px" }}
+                    onClick={() => setGazeThreshold(time)}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -245,16 +257,18 @@ export function SettingsPage({ settings, setSettings }) {
               <span className="ap-setting-title">Auto-Capture Safety Evidence</span>
               <span className="ap-setting-sub">Automatically save optical video snapshot when a critical drowsiness or distraction alarm fires</span>
             </div>
-            <button
-              className={`ap-switch ${autoSnapshot ? "active" : ""}`}
-              onClick={() => setAutoSnapshot(!autoSnapshot)}
-              role="switch"
-              aria-checked={autoSnapshot}
-              aria-label="Toggle auto snapshot"
-            >
-              <span className="ap-switch-track" />
-              <span className="ap-switch-thumb" />
-            </button>
+            <div className="ap-setting-control">
+              <button
+                className={`ap-switch ${autoSnapshot ? "active" : ""}`}
+                onClick={() => setAutoSnapshot(!autoSnapshot)}
+                role="switch"
+                aria-checked={autoSnapshot}
+                aria-label="Toggle auto snapshot"
+              >
+                <span className="ap-switch-track" />
+                <span className="ap-switch-thumb" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -263,15 +277,15 @@ export function SettingsPage({ settings, setSettings }) {
           <div className="ap-card-header">
             <h2 className="ap-card-title">
               <span className="ap-card-title-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
               </span>
-              Hardware &amp; Neural Core Architecture
+              <span className="ap-card-title-multicolor">Hardware &amp; Neural Core Architecture</span>
             </h2>
-            <span className="ap-tag ap-tag-safe">Nominal</span>
+            <span className="ap-tag ap-tag-safe" style={{ fontSize: "11px", padding: "2px 8px" }}>Nominal</span>
           </div>
 
           <div className="ap-table-wrap" style={{ border: "none" }}>
@@ -280,22 +294,22 @@ export function SettingsPage({ settings, setSettings }) {
                 <tr>
                   <td><strong>DriverGuard Platform Version</strong></td>
                   <td>v1.0.0 (Fleet Production Engine)</td>
-                  <td><span className="ap-tag ap-tag-safe">UP TO DATE</span></td>
+                  <td><span className="ap-tag ap-tag-safe" style={{ fontSize: "11px", padding: "2px 8px" }}>UP TO DATE</span></td>
                 </tr>
                 <tr>
                   <td><strong>AI Vision Ensemble</strong></td>
                   <td>Dual Model: MobileNetV2 + ShuffleNetV2 ONNX</td>
-                  <td><span className="ap-tag ap-tag-safe">ACTIVE</span></td>
+                  <td><span className="ap-tag ap-tag-safe" style={{ fontSize: "11px", padding: "2px 8px" }}>ACTIVE</span></td>
                 </tr>
                 <tr>
                   <td><strong>Optical Input Stream</strong></td>
                   <td>DirectShow Single Camera • 640x480 @ 30 FPS</td>
-                  <td><span className="ap-tag ap-tag-info">HARDWARE OK</span></td>
+                  <td><span className="ap-tag ap-tag-info" style={{ fontSize: "11px", padding: "2px 8px" }}>HARDWARE OK</span></td>
                 </tr>
                 <tr>
                   <td><strong>Inference Pipeline Latency</strong></td>
                   <td>Average: 18ms • Max: 32ms (Edge Accelerated)</td>
-                  <td><span className="ap-tag ap-tag-safe">REAL-TIME</span></td>
+                  <td><span className="ap-tag ap-tag-safe" style={{ fontSize: "11px", padding: "2px 8px" }}>REAL-TIME</span></td>
                 </tr>
               </tbody>
             </table>
