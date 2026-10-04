@@ -958,30 +958,31 @@ function addTimelineEvent(text, chipClass) {
 }
 
 function renderRecentAlerts() {
-  if (state.alertHistory.length === 0) {
-    el.historyEmptyState.hidden = false;
-    return;
+  if (el.historyEmptyState) {
+    el.historyEmptyState.hidden = state.alertHistory.length !== 0;
   }
-  el.historyEmptyState.hidden = true;
 
-  el.alertHistoryList.innerHTML = "";
-  state.alertHistory.slice(0, 4).forEach(item => {
-    const div = document.createElement("div");
-    div.className = "history-item";
-    const tagCls = item.level === "CRITICAL" || item.level === "DROWSY" ? "tag-danger" : "tag-warn";
-    div.innerHTML = `
-      <span class="history-time">${item.time}</span>
-      <span class="history-tag ${tagCls}">${item.level}</span>
-      <span class="history-conf">Score: ${item.score}</span>
-    `;
-    el.alertHistoryList.appendChild(div);
-  });
+  if (el.alertHistoryList) {
+    el.alertHistoryList.innerHTML = "";
+    state.alertHistory.slice(0, 4).forEach(item => {
+      const div = document.createElement("div");
+      div.className = "history-item";
+      const tagCls = item.level === "CRITICAL" || item.level === "DROWSY" ? "tag-danger" : "tag-warn";
+      div.innerHTML = `
+        <span class="history-time">${item.time}</span>
+        <span class="history-tag ${tagCls}">${item.level}</span>
+        <span class="history-conf">Score: ${item.score}</span>
+      `;
+      el.alertHistoryList.appendChild(div);
+    });
+  }
 
   /* Also populate full table in Alerts tab */
   renderFullAlertTable();
 }
 
 function renderFullAlertTable() {
+  if (!el.fullAlertsTbody) return;
   el.fullAlertsTbody.innerHTML = "";
   if (state.alertHistory.length === 0) {
     el.fullAlertsTbody.innerHTML = `<tr><td colspan="6" class="table-empty">No alerts recorded yet.</td></tr>`;
@@ -1004,7 +1005,7 @@ function renderFullAlertTable() {
 
 function clearAlertHistory() {
   state.alertHistory = [];
-  el.alertTabCount.textContent = "0";
+  if (el.alertTabCount) el.alertTabCount.textContent = "0";
   renderRecentAlerts();
   renderFullAlertTable();
 }
