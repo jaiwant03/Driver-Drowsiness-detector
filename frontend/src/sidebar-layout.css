@@ -1045,9 +1045,9 @@
 }
 
 .db-hero-greeting {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
-  color: #0F172A;
+  color: #0A1128;
   margin: 0;
   font-family: "Plus Jakarta Sans", "Inter", sans-serif;
   letter-spacing: -0.4px;
@@ -1056,8 +1056,8 @@
 
 .db-hero-sub {
   font-size: 14.5px;
-  font-weight: 500;
-  color: #64748B;
+  font-weight: 600;
+  color: #475569;
   margin: 0;
 }
 
@@ -1079,14 +1079,15 @@
   height: 100%;
   object-fit: cover;
   object-position: right 72%;
+  filter: brightness(1.10) saturate(1.22) contrast(1.04);
 }
 
 /* ── Status Banner ("Driver Safe") ───────────────────────────── */
 .db-status-banner {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F2FDF9 60%, #E8FCF5 100%);
+  border: 1px solid #A7F3D0;
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08), 0 1px 3px rgba(15, 23, 42, 0.02);
   padding: 18px 24px;
   display: flex;
   align-items: center;
@@ -1101,13 +1102,15 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 4px;
-  background: #0D9488;
+  width: 5px;
+  background: linear-gradient(180deg, #00E5FF 0%, #10B981 100%);
   border-radius: 14px 0 0 14px;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
 }
 
 .db-banner-alert .db-banner-left-indicator {
-  background: #DC2626;
+  background: linear-gradient(180deg, #FF6B6B 0%, #DC2626 100%);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.45);
 }
 
 .db-banner-icon-circle {
@@ -1115,18 +1118,18 @@
   height: 44px;
   min-width: 44px;
   border-radius: 50%;
-  background: #22C55E;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);
   position: relative;
   z-index: 2;
 }
 
 .db-banner-alert .db-banner-icon-circle {
-  background: #DC2626;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.45);
 }
 
 .db-banner-content {
@@ -1138,9 +1141,9 @@
 }
 
 .db-banner-heading {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 800;
-  color: #0F766E;
+  color: #065F46;
   font-family: "Plus Jakarta Sans", "Inter", sans-serif;
   letter-spacing: -0.2px;
 }
@@ -1152,7 +1155,11 @@
 .db-banner-desc {
   font-size: 14px;
   font-weight: 500;
-  color: #64748B;
+  color: #047857;
+}
+
+.db-banner-alert .db-banner-desc {
+  color: #B91C1C;
 }
 
 .db-banner-wave {
@@ -1171,7 +1178,7 @@
   right: 28px;
   top: 50%;
   transform: translateY(-50%);
-  opacity: 0.65;
+  opacity: 0.85;
   pointer-events: none;
   z-index: 1;
 }
@@ -1202,9 +1209,9 @@
 
 .db-card {
   background: #FFFFFF;
-  border: 1px solid #F1F5F9;
+  border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
   padding: 18px 20px;
   position: relative;
   overflow: hidden;
@@ -1212,8 +1219,8 @@
 }
 
 .db-card:hover {
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
 }
 
 .db-card-header {
@@ -1236,23 +1243,45 @@
 }
 
 .db-icon-teal {
-  background: #E6F7F5;
+  background: linear-gradient(135deg, #E6FFFA 0%, #CCFBF1 100%);
   color: #0D9488;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.22);
 }
 
 .db-icon-blue {
-  background: #E0F2FE;
-  color: #0284C7;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  color: #2563EB;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.22);
+}
+
+.db-icon-indigo {
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  color: #4F46E5;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.22);
 }
 
 .db-icon-cyan {
-  background: #CFFAFE;
+  background: linear-gradient(135deg, #ECFEFF 0%, #CFFAFE 100%);
   color: #0891B2;
+  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.22);
+}
+
+.db-icon-amber {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  color: #D97706;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.22);
+}
+
+.db-icon-purple {
+  background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+  color: #9333EA;
+  box-shadow: 0 2px 8px rgba(147, 51, 234, 0.22);
 }
 
 .db-icon-red {
-  background: #FEE2E2;
-  color: #EF4444;
+  background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+  color: #DC2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.22);
 }
 
 .db-card-label {
@@ -1270,9 +1299,9 @@
 }
 
 .db-card-val-teal {
-  font-size: 34px;
+  font-size: 36px;
   font-weight: 800;
-  color: #0F766E;
+  color: #0D9488;
   line-height: 1;
   font-family: "Plus Jakarta Sans", "Inter", sans-serif;
 }
@@ -1301,8 +1330,8 @@
 }
 
 .db-score-track {
-  height: 6px;
-  background: #F1F5F9;
+  height: 8px;
+  background: #EEF2F6;
   border-radius: 999px;
   overflow: hidden;
   margin-top: 14px;
@@ -1313,6 +1342,8 @@
 .db-score-fill {
   height: 100%;
   border-radius: 999px;
+  background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
   transition: width 0.4s ease, background 0.4s ease;
 }
 
@@ -1348,19 +1379,19 @@
 }
 
 .db-detect-card {
-  background: #FFFFFF;
-  border: 1px solid #F1F5F9;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F7FEFC 100%);
+  border: 1px solid #CCFBF1;
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.06), 0 1px 3px rgba(15, 23, 42, 0.02);
+  padding: 22px 26px;
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .db-detect-card:hover {
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(13, 148, 136, 0.12);
+  transform: translateY(-2px);
 }
 
 .db-detect-header {
@@ -1379,7 +1410,7 @@
 }
 
 .db-detect-status {
-  font-size: 24px;
+  font-size: 25px;
   font-weight: 800;
   margin-bottom: 4px;
   font-family: "Plus Jakarta Sans", "Inter", sans-serif;
@@ -1388,11 +1419,13 @@
 }
 
 .db-status-teal {
-  color: #0F766E;
+  color: #059669;
+  filter: drop-shadow(0 1px 2px rgba(5, 150, 105, 0.15));
 }
 
 .db-status-danger {
   color: #DC2626;
+  filter: drop-shadow(0 1px 2px rgba(220, 38, 38, 0.15));
 }
 
 .db-detect-conf {
