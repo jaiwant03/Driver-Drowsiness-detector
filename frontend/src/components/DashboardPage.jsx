@@ -4,18 +4,18 @@ function CornerWave({ color, opacity = 0.08 }) {
   return (
     <svg
       className="db-card-corner-wave"
-      viewBox="0 0 160 80"
+      viewBox="0 0 180 90"
       preserveAspectRatio="none"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M0 55 C45 35 90 70 160 25 L160 80 L0 80 Z"
+        d="M0 60 C50 38 100 75 180 28 L180 90 L0 90 Z"
         fill={color}
         fillOpacity={opacity}
       />
       <path
-        d="M35 65 C75 48 115 72 160 42 L160 80 L35 80 Z"
+        d="M40 70 C85 52 130 78 180 48 L180 90 L40 90 Z"
         fill={color}
         fillOpacity={opacity * 0.75}
       />
@@ -33,14 +33,14 @@ function BannerWave() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M0 45 C200 15 450 65 800 30 L800 80 L0 80 Z"
+        d="M0 45 C220 18 480 65 800 30 L800 80 L0 80 Z"
         fill="#0D9488"
         fillOpacity="0.05"
       />
       <path
-        d="M150 55 C350 25 580 68 800 45 L800 80 L150 80 Z"
+        d="M160 55 C360 26 600 68 800 45 L800 80 L160 80 Z"
         fill="#0D9488"
-        fillOpacity="0.04"
+        fillOpacity="0.035"
       />
     </svg>
   );
@@ -50,18 +50,18 @@ function DetectionWave() {
   return (
     <svg
       className="db-detect-wave"
-      viewBox="0 0 450 70"
+      viewBox="0 0 500 80"
       preserveAspectRatio="none"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M0 42 C120 18 260 58 450 24 L450 70 L0 70 Z"
+        d="M0 48 C140 22 300 68 500 28 L500 80 L0 80 Z"
         fill="#0D9488"
-        fillOpacity="0.05"
+        fillOpacity="0.06"
       />
       <path
-        d="M80 50 C200 28 320 62 450 36 L450 70 L80 70 Z"
+        d="M90 58 C230 34 370 72 500 42 L500 80 L90 80 Z"
         fill="#0D9488"
         fillOpacity="0.04"
       />
