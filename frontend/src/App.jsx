@@ -68,13 +68,22 @@ export default function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // Tab switch handler: activates selected tab and resets view to top
+  // Smooth scroll to section when tab clicked
   const handleTabClick = (tabKey) => {
     setActiveTab(tabKey);
-    window.scrollTo({ top: 0, behavior: "instant" });
+    const targetEl = document.getElementById(`${tabKey}-section`);
+    if (targetEl) {
+      const headerOffset = 80;
+      const elementPosition = targetEl.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
   };
 
-  // Scroll listener for progress bar and back-to-top button on scrollable tabs
+  // Scroll spy to update active tab and scroll progress with smooth tracking
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -84,12 +93,25 @@ export default function App() {
       } else {
         setScrollProgress(0);
       }
-      setShowScrollTop(scrollY > 280);
+      setShowScrollTop(scrollY > 300);
+
+      // Section spy to highlight current active tab
+      const sections = ["live", "analytics", "alerts", "report"];
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(`${sections[i]}-section`);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 160) {
+            setActiveTab(sections[i]);
+            break;
+          }
+        }
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [setActiveTab]);
 
   return (
     <div className={`app-root ${focusMode ? "focus-mode-active" : ""}`}>
@@ -126,15 +148,10 @@ export default function App() {
         />
       )}
 
-      {/* 3. DEDICATED TAB-BASED SCREENS (PRESERVES CAMERA STREAM & AI INFERENCE) */}
+      {/* 3. VERTICAL SCROLLING DASHBOARD MAIN CONTAINER */}
       <main className="cc-viewport" id="dashboard">
-        {/* Screen 1: Live Monitor & Driver Telemetry */}
-        <div
-          id="live-tab-screen"
-          className={`tab-screen-panel ${activeTab === "live" ? "active-screen" : "hidden-screen"}`}
-          role="tabpanel"
-          aria-hidden={activeTab !== "live"}
-        >
+        {/* Section 1: Live Monitor & Driver Telemetry */}
+        <section id="live-section" className="dashboard-section">
           <LiveMonitor
             videoRef={videoRef}
             canvasRef={canvasRef}
@@ -150,15 +167,10 @@ export default function App() {
             onReset={resetSession}
             onSnapshot={captureSnapshot}
           />
-        </div>
+        </section>
 
-        {/* Screen 2: Real-Time Analytics, Donut & Trend Charts */}
-        <div
-          id="analytics-tab-screen"
-          className={`tab-screen-panel ${activeTab === "analytics" ? "active-screen" : "hidden-screen"}`}
-          role="tabpanel"
-          aria-hidden={activeTab !== "analytics"}
-        >
+        {/* Section 2: Real-Time Analytics, Donut & Trend Charts */}
+        <section id="analytics-section" className="dashboard-section">
           <AnalyticsTab
             maxFrames={maxFrames}
             drowsyEvents={drowsyEvents}
@@ -171,30 +183,20 @@ export default function App() {
             drowsinessData={drowsinessData}
             distractionData={distractionData}
           />
-        </div>
+        </section>
 
-        {/* Screen 3: Alert History & Event Log */}
-        <div
-          id="alerts-tab-screen"
-          className={`tab-screen-panel ${activeTab === "alerts" ? "active-screen" : "hidden-screen"}`}
-          role="tabpanel"
-          aria-hidden={activeTab !== "alerts"}
-        >
+        {/* Section 3: Alert History & Event Log */}
+        <section id="alerts-section" className="dashboard-section">
           <AlertsTab
             alertHistory={alertHistory}
             onClear={() => setAlertHistory([])}
             onOpenGallery={() => setIsGalleryOpen(true)}
             snapshotCount={snapshots.length}
           />
-        </div>
+        </section>
 
-        {/* Screen 4: Fleet Safety Audit Report */}
-        <div
-          id="report-tab-screen"
-          className={`tab-screen-panel ${activeTab === "report" ? "active-screen" : "hidden-screen"}`}
-          role="tabpanel"
-          aria-hidden={activeTab !== "report"}
-        >
+        {/* Section 4: Fleet Safety Audit Report */}
+        <section id="report-section" className="dashboard-section">
           <ReportTab
             sessionSeconds={sessionSeconds}
             maxFrames={maxFrames}
@@ -205,7 +207,7 @@ export default function App() {
             onExportPDF={exportPDF}
             onExportCSV={exportCSV}
           />
-        </div>
+        </section>
       </main>
 
       {/* 4. COMPACT SYSTEM STATUS FOOTER */}
