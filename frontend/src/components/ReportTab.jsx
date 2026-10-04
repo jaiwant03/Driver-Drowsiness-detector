@@ -115,6 +115,5 @@ export function ReportTab({
           </div>
         </div>
       </div>
-    </div>
   );
 }
