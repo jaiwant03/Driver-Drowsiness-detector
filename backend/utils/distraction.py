@@ -277,10 +277,6 @@ class DistractionDetector:
             self.class_names = list(FALLBACK_CLASSES)
             self.num_classes_from_ckpt = len(self.class_names)
             state_dict = checkpoint
-            print(
-                f"[Distraction] Checkpoint type: STATE_DICT (no metadata)  "
-                f"| using fallback class names"
-            )
         else:
             raise ValueError(
                 f"Unrecognised checkpoint format in {self.model_path}. "
