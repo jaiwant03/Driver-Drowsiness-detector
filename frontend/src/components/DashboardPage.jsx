@@ -124,7 +124,9 @@ export function DashboardPage({
       <div className="db-hero-header">
         <div className="db-hero-text">
           <h1 className="db-hero-greeting">{getGreeting()}</h1>
-          <p className="db-hero-sub">DriverGuard Safety Dashboard</p>
+          <p className="db-hero-sub">
+            <span className="db-hero-brand-multi">DriverGuard</span> Safety Dashboard
+          </p>
         </div>
         <div className="db-hero-scenic" aria-hidden="true">
           <img
@@ -161,7 +163,7 @@ export function DashboardPage({
         <BannerWave />
 
         <div className="db-banner-watermark" aria-hidden="true">
-          <svg width="46" height="46" viewBox="0 0 32 32" fill="none">
+          <svg width="52" height="52" viewBox="0 0 32 32" fill="none">
             <defs>
               <linearGradient id="dbBannerMultiShield" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#00E5FF" />
@@ -173,20 +175,20 @@ export function DashboardPage({
             <path
               d="M16 3L5 7.5V15C5 22.2 9.7 28 16 29.5C22.3 28 27 22.2 27 15V7.5L16 3Z"
               stroke="url(#dbBannerMultiShield)"
-              strokeWidth="2.5"
+              strokeWidth="2.8"
               strokeLinecap="round"
               strokeLinejoin="round"
               fill="url(#dbBannerMultiShield)"
-              fillOpacity="0.10"
+              fillOpacity="0.14"
             />
             <path
               d="M16 7.5L9 11V15C9 20 12 24.5 16 25.8C20 24.5 23 20 23 15V11L16 7.5Z"
               stroke="url(#dbBannerMultiShield)"
-              strokeWidth="1.6"
+              strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
               fill="none"
-              opacity="0.8"
+              opacity="0.9"
             />
           </svg>
         </div>
