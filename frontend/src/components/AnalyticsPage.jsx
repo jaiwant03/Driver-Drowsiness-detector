@@ -15,15 +15,6 @@ export function AnalyticsPage({
 }) {
   return (
     <div className="page-analytics">
-      {/* Page Header */}
-      <div className="page-header">
-        <div className="page-header-left">
-          <h1 className="page-title">Analytics</h1>
-          <p className="page-subtitle">Session statistics and trends</p>
-        </div>
-      </div>
-
-      {/* Analytics Content */}
       <AnalyticsTab
         maxFrames={maxFrames}
         drowsyEvents={drowsyEvents}
