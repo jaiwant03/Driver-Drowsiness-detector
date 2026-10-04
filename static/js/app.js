@@ -518,8 +518,9 @@ function updateUI(data) {
   if (drowsiness) updateDrowsinessPanel(drowsiness);
   if (distraction) updateDistractionPanel(distraction);
 
-  /* Calculate Driver Safety Score */
+  /* Calculate Driver Safety Score & Driver Status */
   calculateSafetyScore(drowsiness, distraction);
+  updateDriverStatusIndicators(drowsiness, distraction);
 
   /* Safety Level & Alerting */
   updateSafetyLevel(safety_level, safety_message);
@@ -572,17 +573,17 @@ function calculateSafetyScore(drowsiness, distraction) {
   el.scoreRingFill.style.strokeDashoffset = dashOffset;
   el.scoreValue.textContent = score;
 
-  /* Determine Rating Category & Color */
-  let color = "#10B981";
+  /* Determine Rating Category & Color (Orange Brand Accent) */
+  let color = "#16A34A";
   let label = "EXCELLENT";
   if (score < 50) {
-    color = "#EF4444";
+    color = "#DC2626";
     label = "CRITICAL";
   } else if (score < 75) {
     color = "#F59E0B";
     label = "WARNING";
   } else if (score < 90) {
-    color = "#0EA5A4";
+    color = "#F97316";
     label = "GOOD";
   }
 
@@ -602,36 +603,68 @@ function updateDriverStatusIndicators(drowsiness, distraction) {
   const dist   = distraction?.is_distracted;
 
   /* Eyes */
-  el.statusEyesText.textContent = closed ? "CLOSED" : "OPEN";
-  el.statusEyesText.style.color = closed ? "var(--danger-red-dark)" : "var(--safe-green-dark)";
-  el.pillEyes.querySelector(".pill-icon-dot").className = `pill-icon-dot ${closed ? "danger" : "safe"}`;
+  if (el.statusEyesText) {
+    el.statusEyesText.textContent = closed ? "CLOSED" : "OPEN";
+    el.statusEyesText.style.color = closed ? "var(--danger-red-dark)" : "var(--safe-green-dark)";
+  }
+  const dotEyes = el.pillEyes?.querySelector(".pill-dot, .pill-icon-dot");
+  if (dotEyes) dotEyes.className = `pill-dot ${closed ? "danger" : "safe"}`;
 
   /* Yawn */
-  el.statusYawnText.textContent = yawn ? "DETECTED" : "NO YAWN";
-  el.statusYawnText.style.color = yawn ? "var(--warn-orange-dark)" : "var(--safe-green-dark)";
-  el.pillYawn.querySelector(".pill-icon-dot").className = `pill-icon-dot ${yawn ? "warn" : "safe"}`;
+  if (el.statusYawnText) {
+    el.statusYawnText.textContent = yawn ? "DETECTED" : "NO YAWN";
+    el.statusYawnText.style.color = yawn ? "var(--warn-orange-dark)" : "var(--safe-green-dark)";
+  }
+  const dotYawn = el.pillYawn?.querySelector(".pill-dot, .pill-icon-dot");
+  if (dotYawn) dotYawn.className = `pill-dot ${yawn ? "warn" : "safe"}`;
 
   /* Distraction */
-  el.statusDistractText.textContent = dist ? "DISTRACTED" : "SAFE";
-  el.statusDistractText.style.color = dist ? "var(--danger-red-dark)" : "var(--safe-green-dark)";
-  el.pillDistract.querySelector(".pill-icon-dot").className = `pill-icon-dot ${dist ? "danger" : "safe"}`;
+  if (el.statusDistractText) {
+    el.statusDistractText.textContent = dist ? "DISTRACTED" : "SAFE";
+    el.statusDistractText.style.color = dist ? "var(--danger-red-dark)" : "var(--safe-green-dark)";
+  }
+  const dotDist = el.pillDistract?.querySelector(".pill-dot, .pill-icon-dot");
+  if (dotDist) dotDist.className = `pill-dot ${dist ? "danger" : "safe"}`;
+
+  /* Camera Overlay Live Status Chips */
+  const ovEyes = $("camOvEyes");
+  const ovEyesText = $("camOvEyesText");
+  const ovYawn = $("camOvYawn");
+  const ovYawnText = $("camOvYawnText");
+  const ovDistract = $("camOvDistract");
+  const ovDistractText = $("camOvDistractText");
+
+  if (ovEyes && ovEyesText) {
+    ovEyes.className = `cam-ov-chip ${closed ? "danger" : "safe"}`;
+    ovEyesText.textContent = closed ? "EYES CLOSED" : "EYES OPEN";
+  }
+  if (ovYawn && ovYawnText) {
+    ovYawn.className = `cam-ov-chip ${yawn ? "warn" : "safe"}`;
+    ovYawnText.textContent = yawn ? "YAWN DETECTED" : "NO YAWN";
+  }
+  if (ovDistract && ovDistractText) {
+    ovDistract.className = `cam-ov-chip ${dist ? "danger" : "safe"}`;
+    ovDistractText.textContent = dist ? (distraction?.prediction || "DISTRACTED").toUpperCase() : "NO DISTRACTION";
+  }
 
   /* Face Tag */
   const faceOk = drowsiness?.face_detected;
-  el.camFaceTag.textContent = faceOk ? "FACE: TRACKED" : "FACE: NO FACE";
-  el.camFaceTag.style.color = faceOk ? "#60A5FA" : "#F87171";
+  if (el.camFaceTag) {
+    el.camFaceTag.textContent = faceOk ? "FACE: TRACKED" : "FACE: NO FACE";
+    el.camFaceTag.style.color = faceOk ? "#60A5FA" : "#F87171";
+  }
 }
 
 /* ─── Safety Level & Banner ────────────────────────────── */
 function updateSafetyLevel(level, message) {
   const map = {
-    SAFE:        { badge: "SAFE",        cls: "badge-safe",     video: "v-safe",     wrap: "active",     dot: "#10B981" },
-    DROWSY:      { badge: "DROWSY",      cls: "badge-danger",   video: "v-drowsy",   wrap: "drowsy",     dot: "#EF4444" },
-    DISTRACTED:  { badge: "DISTRACTED",  cls: "badge-warn",     video: "v-distract", wrap: "distracted", dot: "#F59E0B" },
+    SAFE:        { badge: "SAFE",        cls: "badge-safe",     video: "v-safe",     wrap: "active",     dot: "#16A34A" },
+    DROWSY:      { badge: "DROWSY",      cls: "badge-danger",   video: "v-drowsy",   wrap: "drowsy",     dot: "#DC2626" },
+    DISTRACTED:  { badge: "DISTRACTED",  cls: "badge-warn",     video: "v-distract", wrap: "distracted", dot: "#F97316" },
     CRITICAL:    { badge: "CRITICAL",    cls: "badge-critical", video: "v-critical", wrap: "critical",   dot: "#DC2626" },
     NO_FACE:     { badge: "NO FACE",     cls: "badge-muted",    video: "",           wrap: "active",     dot: "#94A3B8" },
     WAITING:     { badge: "WAITING",     cls: "badge-muted",    video: "",           wrap: "active",     dot: "#94A3B8" },
-    MONITORING:  { badge: "MONITORING",  cls: "badge-muted",    video: "",           wrap: "active",     dot: "#2563EB" },
+    MONITORING:  { badge: "MONITORING",  cls: "badge-muted",    video: "",           wrap: "active",     dot: "#F97316" },
   };
 
   const cfg = map[level] ?? map["WAITING"];
@@ -640,16 +673,58 @@ function updateSafetyLevel(level, message) {
 
   el.videoWrap.className = `video-wrap ${cfg.wrap}`;
 
-  /* Alert Strip Banner */
-  if (state.settings.visualEnabled && (level === "DROWSY" || level === "DISTRACTED" || level === "CRITICAL")) {
-    showBanner(message || `${cfg.badge} DETECTED`, level);
-  } else if (level === "SAFE") {
-    hideBanner();
+  /* Update Hero Driver Status in Score Panel */
+  const heroText = $("heroStatusText");
+  const heroIcon = $("heroStatusIcon");
+  const heroSub  = $("heroStatusSub");
+  if (heroText && heroIcon) {
+    if (level === "CRITICAL" || level === "DROWSY") {
+      heroIcon.textContent = "🔴";
+      heroText.textContent = "CRITICAL ALERT";
+      heroText.style.color = "var(--danger-red)";
+      if (heroSub) heroSub.textContent = "Driver drowsiness / critical hazard detected";
+    } else if (level === "DISTRACTED") {
+      heroIcon.textContent = "🟠";
+      heroText.textContent = "ATTENTION NEEDED";
+      heroText.style.color = "var(--orange-primary)";
+      if (heroSub) heroSub.textContent = "Driver is distracted from the road";
+    } else {
+      heroIcon.textContent = "🟢";
+      heroText.textContent = "ALERT";
+      heroText.style.color = "var(--safe-green)";
+      if (heroSub) heroSub.textContent = "Driver is attentive and fully responsive";
+    }
+  }
+
+  /* Update Alert Strip Banner */
+  const banner = el.alertBanner;
+  const bannerText = el.alertBannerText;
+  const statusIcon = $("alertStatusIcon");
+  const stripBadge = el.alertStripBadge;
+
+  if (level === "CRITICAL" || level === "DROWSY") {
+    banner.className = "alert-banner alert-danger";
+    if (statusIcon) statusIcon.textContent = "🔴";
+    if (stripBadge) stripBadge.textContent = "CRITICAL SAFETY ALERT";
+    if (bannerText) bannerText.textContent = message || "Driver is drowsy and distracted.";
+    banner.hidden = false;
+  } else if (level === "DISTRACTED") {
+    banner.className = "alert-banner alert-warning";
+    if (statusIcon) statusIcon.textContent = "🟠";
+    if (stripBadge) stripBadge.textContent = "ATTENTION REQUIRED";
+    if (bannerText) bannerText.textContent = message || "Drowsiness / inattention indicators detected.";
+    banner.hidden = false;
+  } else {
+    banner.className = "alert-banner alert-safe";
+    if (statusIcon) statusIcon.textContent = "🟢";
+    if (stripBadge) stripBadge.textContent = "DRIVER SAFE";
+    if (bannerText) bannerText.textContent = "Driver is alert and focused.";
+    banner.hidden = false;
   }
 
   /* Safety Metric Pill */
-  el.statSafety.textContent = cfg.badge;
-  el.safetyIndicatorDot.style.backgroundColor = cfg.dot;
+  if (el.statSafety) el.statSafety.textContent = cfg.badge;
+  if (el.safetyIndicatorDot) el.safetyIndicatorDot.style.backgroundColor = cfg.dot;
 
   /* Check for Alert History & Timeline Event creation */
   if (level === "DROWSY" || level === "DISTRACTED" || level === "CRITICAL") {
