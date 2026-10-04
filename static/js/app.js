@@ -537,8 +537,10 @@ function hideAlarm() {
 }
 
 /* ─── Inline banner (non-blocking) ─────────────────────── */
-function showBanner(text) {
+function showBanner(text, level = "CRITICAL") {
   el.alertBannerText.textContent = text;
+  const isWarn = level === "DISTRACTED";
+  el.alertBanner.className = `alert-banner ${isWarn ? "alert-warning" : "alert-critical"}`;
   el.alertBanner.hidden = false;
 }
 
