@@ -1,6 +1,6 @@
 """
-Driver Drowsiness & Distraction Detection — Flask Backend
-=========================================================
+Driver Drowsiness & Distraction Detection — Flask Backend (API only)
+=====================================================================
 
 Loads both models ONCE at startup, then serves every camera frame
 through both simultaneously via POST /api/predict.
@@ -14,10 +14,12 @@ Browser → JPEG frame → POST /api/predict
 
 Endpoints
 ---------
-GET  /              → Serve frontend (templates/index.html)
 GET  /api/health    → System status JSON
 POST /api/predict   → Accept JPEG frame, return both model predictions
 POST /api/reset     → Reset all temporal state and counters
+
+Frontend is served separately by Vite dev server (npm run dev) in the
+frontend/ directory.  This backend serves only JSON API endpoints.
 """
 
 from __future__ import annotations
