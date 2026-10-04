@@ -3,132 +3,239 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DriverGuard — Drowsiness & Distraction Monitor</title>
+  <meta name="description" content="DriverGuard — Real-Time Driver Drowsiness & Distraction Monitoring System powered by deep learning." />
+  <title>DriverGuard — AI Driver Safety Monitor</title>
+
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 
 <body>
 
-  <!-- ═══════════════════════════════════════════════════════
-       HEADER
-  ════════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════
+       TOPBAR / NAVIGATION
+  ════════════════════════════════════════════════════════════ -->
   <header class="topbar" role="banner">
-    <div class="brand">
-      <div class="brand-icon" aria-hidden="true">DG</div>
-      <div>
-        <h1>DriverGuard</h1>
-        <p>Real-Time Drowsiness &amp; Distraction Monitor</p>
+    <div class="topbar-container">
+      
+      <!-- Brand Logo & Title -->
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <!-- Professional Shield + Steering / Safety Icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <circle cx="12" cy="11" r="3"/>
+            <path d="m9 18 3-2 3 2"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1>DriverGuard</h1>
+            <span class="brand-badge">AI Safety</span>
+          </div>
+          <p>Real-Time Driver Safety Monitor</p>
+        </div>
       </div>
-    </div>
 
-    <div class="header-right">
-      <div class="backend-status" id="backendStatus" aria-live="polite">
-        <span class="status-dot" id="statusDot"></span>
-        <span id="statusText">Connecting…</span>
+      <!-- System Telemetry & Status -->
+      <div class="header-right">
+        <!-- Backend Connection Status -->
+        <div class="backend-status" id="backendStatus" aria-live="polite">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Connecting…</span>
+        </div>
+
+        <!-- Frame Rate Pill -->
+        <div class="fps-badge" id="fpsBadge" aria-label="Frames per second">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <span id="fpsValue">— fps</span>
+        </div>
       </div>
 
-      <div class="fps-badge" id="fpsBadge" aria-label="Frames per second">— fps</div>
     </div>
   </header>
 
 
-  <!-- ═══════════════════════════════════════════════════════
-       ALERT BANNER (inline, above dashboard)
-  ════════════════════════════════════════════════════════ -->
-  <div class="alert-banner" id="alertBanner" role="alert" aria-live="assertive" hidden>
-    <span class="alert-banner-icon">⚠</span>
-    <span id="alertBannerText"></span>
-    <button class="alert-banner-close" id="alertBannerClose" aria-label="Dismiss alert">✕</button>
+  <!-- ═══════════════════════════════════════════════════════════
+       SAFETY ALERT BANNER (Dynamic Alert Card)
+  ════════════════════════════════════════════════════════════ -->
+  <div class="alert-wrapper">
+    <div class="alert-banner" id="alertBanner" role="alert" aria-live="assertive" hidden>
+      <div class="alert-main">
+        <div class="alert-icon-box" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="alert-text">
+          <span class="alert-heading">CRITICAL SAFETY ALERT</span>
+          <p id="alertBannerText">Driver attention warning detected. Please stay focused on the road.</p>
+        </div>
+      </div>
+      <button class="alert-banner-close" id="alertBannerClose" aria-label="Dismiss alert">✕</button>
+    </div>
   </div>
 
 
-  <!-- ═══════════════════════════════════════════════════════
+  <!-- ═══════════════════════════════════════════════════════════
        MAIN DASHBOARD
-  ════════════════════════════════════════════════════════ -->
+  ════════════════════════════════════════════════════════════ -->
   <main class="dashboard" id="dashboard">
 
-    <!-- ─────────────────── LEFT COLUMN ─────────────────── -->
-    <section class="panel camera-panel" aria-label="Live Camera">
+    <!-- ─────────────────────────────────────────────────────────
+         LEFT COLUMN: LIVE CAMERA MONITORING
+    ────────────────────────────────────────────────────────── -->
+    <section class="panel camera-panel" aria-label="Live Camera Monitoring">
 
+      <!-- Panel Header -->
       <div class="panel-header">
         <div class="panel-title">
-          <span class="panel-icon">◉</span>
+          <div class="panel-icon-wrap icon-camera">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/>
+              <rect x="2" y="6" width="14" height="12" rx="3"/>
+            </svg>
+          </div>
           <div>
-            <h2>Live Camera</h2>
-            <p>Single camera · dual-model analysis</p>
+            <h2>LIVE CAMERA</h2>
+            <p>Real-time AI driver monitoring</p>
           </div>
         </div>
-        <div class="safety-badge" id="safetyBadge">WAITING</div>
-      </div>
 
-      <!-- Video -->
-      <div class="video-wrap" id="videoWrap">
-        <video id="cameraFeed" autoplay muted playsinline aria-label="Webcam feed"></video>
-        <canvas id="captureCanvas" hidden aria-hidden="true"></canvas>
-
-        <!-- Corner brackets overlay -->
-        <div class="vf-overlay" aria-hidden="true">
-          <div class="corner tl"></div>
-          <div class="corner tr"></div>
-          <div class="corner bl"></div>
-          <div class="corner br"></div>
-          <!-- Scan line animation when active -->
-          <div class="scan-line" id="scanLine"></div>
-        </div>
-
-        <!-- Safety level watermark on video -->
-        <div class="video-status" id="videoStatus" aria-hidden="true">
-          <span id="videoStatusText">WAITING</span>
-        </div>
-
-        <!-- Placeholder shown before camera starts -->
-        <div class="camera-placeholder" id="cameraPlaceholder">
-          <div class="placeholder-icon">◉</div>
-          <p class="placeholder-title">Camera not started</p>
-          <p class="placeholder-sub">Click <strong>Start Monitoring</strong> to begin</p>
+        <div class="header-badges">
+          <div class="live-pill" id="livePill" aria-hidden="true">
+            <span class="live-indicator"></span> LIVE
+          </div>
+          <div class="safety-badge" id="safetyBadge">WAITING</div>
         </div>
       </div>
 
-      <!-- Camera controls -->
+      <!-- Viewport Card -->
+      <div class="camera-viewport-container">
+        <div class="video-wrap" id="videoWrap">
+          <video id="cameraFeed" autoplay muted playsinline aria-label="Webcam feed"></video>
+          <canvas id="captureCanvas" hidden aria-hidden="true"></canvas>
+
+          <!-- Precision Viewfinder Corner Accents -->
+          <div class="vf-overlay" aria-hidden="true">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <!-- Dynamic scanning beam -->
+            <div class="scan-line" id="scanLine"></div>
+          </div>
+
+          <!-- Video Status Overlay Tag -->
+          <div class="video-status" id="videoStatus" aria-hidden="true">
+            <span class="status-pulse-dot"></span>
+            <span id="videoStatusText">WAITING</span>
+          </div>
+
+          <!-- Top-Right Viewport Tag -->
+          <div class="video-tag-top" aria-hidden="true">
+            <span>AI VISION 640×480</span>
+          </div>
+
+          <!-- Standby Placeholder (When Camera Stopped) -->
+          <div class="camera-placeholder" id="cameraPlaceholder">
+            <div class="placeholder-graphic">
+              <div class="placeholder-circle-outer">
+                <div class="placeholder-circle-inner">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/>
+                    <rect x="2" y="6" width="14" height="12" rx="3"/>
+                    <circle cx="9" cy="12" r="2.5"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <p class="placeholder-title">Camera Feed Standby</p>
+            <p class="placeholder-sub">Click <strong>Start Monitoring</strong> to initiate real-time driver detection</p>
+            <div class="placeholder-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Runs 100% locally in browser
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Controls -->
       <div class="camera-controls">
         <button class="btn btn-primary" id="btnStart">
-          <span aria-hidden="true">▶</span> Start Monitoring
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Start Monitoring
         </button>
+
         <button class="btn btn-stop" id="btnStop" disabled>
-          <span aria-hidden="true">■</span> Stop
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+          </svg>
+          Stop
         </button>
+
         <button class="btn btn-secondary" id="btnReset">
-          <span aria-hidden="true">↺</span> Reset
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          Reset
         </button>
       </div>
 
-      <!-- Inference timing -->
+      <!-- Inference Latency Row -->
       <div class="inference-row">
-        <span>Inference time</span>
+        <div class="inference-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>Inference Latency</span>
+        </div>
         <strong id="inferenceTime">— ms</strong>
       </div>
 
     </section>
 
 
-    <!-- ─────────────────── RIGHT COLUMN ─────────────────── -->
+    <!-- ─────────────────────────────────────────────────────────
+         RIGHT COLUMN: DROWSINESS & DISTRACTION DETECTORS
+    ────────────────────────────────────────────────────────── -->
     <div class="right-column">
 
-      <!-- ── DROWSINESS CARD ── -->
+      <!-- ── 1. DROWSINESS CARD ── -->
       <section class="panel detection-panel" id="drowsinessPanel" aria-label="Drowsiness Detection">
+        
+        <!-- Header -->
         <div class="panel-header">
           <div class="panel-title">
-            <span class="panel-icon drowsy-icon-color">👁</span>
+            <div class="panel-icon-wrap icon-eye">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
             <div>
-              <h2>Drowsiness</h2>
-              <p>MobileNetV2 · Keras</p>
+              <h2>DROWSINESS</h2>
+              <p>AI-powered eye and fatigue detection</p>
             </div>
           </div>
           <div class="detection-badge" id="drowsinessBadge">WAITING</div>
         </div>
 
         <div class="detection-body">
-          <!-- Status icon + label -->
+          <!-- Main Detection Status Banner -->
           <div class="det-main">
             <div class="det-icon" id="drowsinessIcon" aria-hidden="true">?</div>
             <div class="det-info">
@@ -137,49 +244,67 @@
             </div>
           </div>
 
-          <!-- Confidence bar -->
-          <div class="metric-row">
-            <span class="metric-name">Confidence</span>
-            <strong class="metric-value" id="drowsinessConf">0%</strong>
-          </div>
-          <div class="prog-track">
-            <div class="prog-fill" id="drowsinessBar" style="width:0%"></div>
-          </div>
-
-          <!-- Class probabilities -->
-          <div class="prob-grid" id="drowsinessProbs">
-            <div class="prob-item">
-              <div class="prob-row">
-                <span>Eyes Closed</span>
-                <strong id="pClosed">0%</strong>
-              </div>
-              <div class="prog-track sm"><div class="prog-fill drowsy-fill" id="bClosed" style="width:0%"></div></div>
+          <!-- Confidence Meter -->
+          <div class="metric-container">
+            <div class="metric-row">
+              <span class="metric-name">CONFIDENCE</span>
+              <strong class="metric-value" id="drowsinessConf">0.0%</strong>
             </div>
-            <div class="prob-item">
-              <div class="prob-row">
-                <span>Eyes Open</span>
-                <strong id="pOpen">0%</strong>
-              </div>
-              <div class="prog-track sm"><div class="prog-fill alert-fill" id="bOpen" style="width:0%"></div></div>
-            </div>
-            <div class="prob-item">
-              <div class="prob-row">
-                <span>No Yawn</span>
-                <strong id="pNoYawn">0%</strong>
-              </div>
-              <div class="prog-track sm"><div class="prog-fill alert-fill" id="bNoYawn" style="width:0%"></div></div>
-            </div>
-            <div class="prob-item">
-              <div class="prob-row">
-                <span>Yawn</span>
-                <strong id="pYawn">0%</strong>
-              </div>
-              <div class="prog-track sm"><div class="prog-fill drowsy-fill" id="bYawn" style="width:0%"></div></div>
+            <div class="prog-track">
+              <div class="prog-fill" id="drowsinessBar" style="width:0%"></div>
             </div>
           </div>
 
-          <!-- Drowsiness duration -->
-          <div class="timer-row">
+          <!-- Class Probabilities Grid (2x2) -->
+          <div class="prob-section">
+            <span class="section-label">CLASS PROBABILITIES</span>
+            <div class="prob-grid" id="drowsinessProbs">
+              
+              <div class="prob-item">
+                <div class="prob-row">
+                  <span>Eyes Closed</span>
+                  <strong id="pClosed">0.0%</strong>
+                </div>
+                <div class="prog-track sm">
+                  <div class="prog-fill drowsy-fill" id="bClosed" style="width:0%"></div>
+                </div>
+              </div>
+
+              <div class="prob-item">
+                <div class="prob-row">
+                  <span>Eyes Open</span>
+                  <strong id="pOpen">0.0%</strong>
+                </div>
+                <div class="prog-track sm">
+                  <div class="prog-fill alert-fill" id="bOpen" style="width:0%"></div>
+                </div>
+              </div>
+
+              <div class="prob-item">
+                <div class="prob-row">
+                  <span>No Yawn</span>
+                  <strong id="pNoYawn">0.0%</strong>
+                </div>
+                <div class="prog-track sm">
+                  <div class="prog-fill alert-fill" id="bNoYawn" style="width:0%"></div>
+                </div>
+              </div>
+
+              <div class="prob-item">
+                <div class="prob-row">
+                  <span>Yawn</span>
+                  <strong id="pYawn">0.0%</strong>
+                </div>
+                <div class="prog-track sm">
+                  <div class="prog-fill drowsy-fill" id="bYawn" style="width:0%"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Drowsiness Metrics (3 Equal Mini-Cards) -->
+          <div class="timer-row timer-row-3">
             <div class="timer-cell">
               <span class="timer-label">Drowsy Duration</span>
               <strong id="drowsyDuration">0.0 s</strong>
@@ -193,25 +318,36 @@
               <strong id="faceDetected">—</strong>
             </div>
           </div>
+
         </div>
       </section>
 
 
-      <!-- ── DISTRACTION CARD ── -->
+      <!-- ── 2. DISTRACTION CARD ── -->
       <section class="panel detection-panel" id="distractionPanel" aria-label="Distraction Detection">
+        
+        <!-- Header -->
         <div class="panel-header">
           <div class="panel-title">
-            <span class="panel-icon distract-icon-color">🚗</span>
+            <div class="panel-icon-wrap icon-wheel">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="m4.93 4.93 4.24 4.24"/>
+                <path d="m14.83 9.17 4.24-4.24"/>
+                <path d="M12 12v9"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
             <div>
-              <h2>Distraction</h2>
-              <p>ResNet-18 · PyTorch</p>
+              <h2>DISTRACTION</h2>
+              <p>AI driver distraction detection</p>
             </div>
           </div>
           <div class="detection-badge" id="distractionBadge">WAITING</div>
         </div>
 
         <div class="detection-body">
-          <!-- Status icon + label -->
+          <!-- Main Detection Status Banner -->
           <div class="det-main">
             <div class="det-icon" id="distractionIcon" aria-hidden="true">?</div>
             <div class="det-info">
@@ -220,37 +356,45 @@
             </div>
           </div>
 
-          <!-- Confidence bar -->
-          <div class="metric-row">
-            <span class="metric-name">Confidence</span>
-            <strong class="metric-value" id="distractionConf">0%</strong>
-          </div>
-          <div class="prog-track">
-            <div class="prog-fill" id="distractionBar" style="width:0%"></div>
-          </div>
-
-          <!-- Top-3 predictions -->
-          <div class="top3-list" id="top3List">
-            <div class="top3-heading">Top 3 Predictions</div>
-            <div class="top3-item" id="top3_0">
-              <span class="top3-rank">1</span>
-              <span class="top3-name" id="top3Name0">—</span>
-              <strong class="top3-conf" id="top3Conf0">—</strong>
+          <!-- Confidence Meter -->
+          <div class="metric-container">
+            <div class="metric-row">
+              <span class="metric-name">CONFIDENCE</span>
+              <strong class="metric-value" id="distractionConf">0.0%</strong>
             </div>
-            <div class="top3-item" id="top3_1">
-              <span class="top3-rank">2</span>
-              <span class="top3-name" id="top3Name1">—</span>
-              <strong class="top3-conf" id="top3Conf1">—</strong>
-            </div>
-            <div class="top3-item" id="top3_2">
-              <span class="top3-rank">3</span>
-              <span class="top3-name" id="top3Name2">—</span>
-              <strong class="top3-conf" id="top3Conf2">—</strong>
+            <div class="prog-track">
+              <div class="prog-fill" id="distractionBar" style="width:0%"></div>
             </div>
           </div>
 
-          <!-- Distraction duration -->
-          <div class="timer-row">
+          <!-- Top-3 Predictions Section -->
+          <div class="top3-container">
+            <span class="section-label">TOP 3 PREDICTIONS</span>
+            <div class="top3-list" id="top3List">
+              
+              <div class="top3-item is-top" id="top3_0">
+                <span class="top3-rank">1</span>
+                <span class="top3-name" id="top3Name0">—</span>
+                <strong class="top3-conf" id="top3Conf0">—</strong>
+              </div>
+
+              <div class="top3-item" id="top3_1">
+                <span class="top3-rank">2</span>
+                <span class="top3-name" id="top3Name1">—</span>
+                <strong class="top3-conf" id="top3Conf1">—</strong>
+              </div>
+
+              <div class="top3-item" id="top3_2">
+                <span class="top3-rank">3</span>
+                <span class="top3-name" id="top3Name2">—</span>
+                <strong class="top3-conf" id="top3Conf2">—</strong>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Distraction Metrics (2 Equal Mini-Cards) -->
+          <div class="timer-row timer-row-2">
             <div class="timer-cell">
               <span class="timer-label">Distracted Duration</span>
               <strong id="distractDuration">0.0 s</strong>
@@ -260,52 +404,95 @@
               <strong id="distractFrames">0</strong>
             </div>
           </div>
+
         </div>
       </section>
 
     </div><!-- /right-column -->
 
 
-    <!-- ─────────────────── STATS BAR ─────────────────── -->
-    <div class="stats-bar" role="region" aria-label="Session Statistics">
+    <!-- ─────────────────────────────────────────────────────────
+         BOTTOM SECTION: 5 SUMMARY CARDS
+    ────────────────────────────────────────────────────────── -->
+    <div class="stats-bar" role="region" aria-label="Session Telemetry Statistics">
 
-      <div class="stat-cell">
-        <span class="stat-icon" aria-hidden="true">📷</span>
-        <div>
+      <!-- Card 1: Frames Analysed -->
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <div class="stat-content">
           <span class="stat-name">Frames Analysed</span>
-          <strong id="statFrames">0</strong>
+          <strong id="statFrames" class="stat-val">0</strong>
         </div>
       </div>
 
-      <div class="stat-cell">
-        <span class="stat-icon" aria-hidden="true">😴</span>
-        <div>
+      <!-- Card 2: Drowsy Events -->
+      <div class="stat-card">
+        <div class="stat-icon-wrap icon-drowsy">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </div>
+        <div class="stat-content">
           <span class="stat-name">Drowsy Events</span>
-          <strong id="statDrowsyEvents">0</strong>
+          <strong id="statDrowsyEvents" class="stat-val">0</strong>
         </div>
       </div>
 
-      <div class="stat-cell">
-        <span class="stat-icon" aria-hidden="true">📱</span>
-        <div>
+      <!-- Card 3: Distraction Events -->
+      <div class="stat-card">
+        <div class="stat-icon-wrap icon-distract">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+        </div>
+        <div class="stat-content">
           <span class="stat-name">Distraction Events</span>
-          <strong id="statDistractEvents">0</strong>
+          <strong id="statDistractEvents" class="stat-val">0</strong>
         </div>
       </div>
 
-      <div class="stat-cell">
-        <span class="stat-icon" aria-hidden="true">🛡</span>
-        <div>
+      <!-- Card 4: Safety Level -->
+      <div class="stat-card stat-card-safety">
+        <div class="stat-icon-wrap icon-safety">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="stat-content">
           <span class="stat-name">Safety Level</span>
-          <strong id="statSafety">—</strong>
+          <div class="safety-level-row">
+            <span class="safety-indicator-dot"></span>
+            <strong id="statSafety" class="stat-val">—</strong>
+          </div>
         </div>
       </div>
 
-      <div class="stat-cell">
-        <span class="stat-icon" aria-hidden="true">⚙</span>
-        <div>
+      <!-- Card 5: Models Status -->
+      <div class="stat-card">
+        <div class="stat-icon-wrap icon-model">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+            <rect x="9" y="9" width="6" height="6"/>
+            <line x1="9" y1="1" x2="9" y2="4"/>
+            <line x1="15" y1="1" x2="15" y2="4"/>
+            <line x1="9" y1="20" x2="9" y2="23"/>
+            <line x1="15" y1="20" x2="15" y2="23"/>
+            <line x1="20" y1="9" x2="23" y2="9"/>
+            <line x1="20" y1="14" x2="23" y2="14"/>
+            <line x1="1" y1="9" x2="4" y2="9"/>
+            <line x1="1" y1="14" x2="4" y2="14"/>
+          </svg>
+        </div>
+        <div class="stat-content">
           <span class="stat-name">Models Status</span>
-          <strong id="statModels">Loading…</strong>
+          <strong id="statModels" class="stat-val">Loading…</strong>
         </div>
       </div>
 
@@ -314,29 +501,44 @@
   </main><!-- /dashboard -->
 
 
-  <!-- ═══════════════════════════════════════════════════════
-       ALARM MODAL
-  ════════════════════════════════════════════════════════ -->
-  <div class="alarm-backdrop" id="alarmBackdrop" role="dialog"
-       aria-modal="true" aria-labelledby="alarmTitle" hidden>
+  <!-- ═══════════════════════════════════════════════════════════
+       ALARM MODAL (Emergent Audio/Visual Pop-up)
+  ════════════════════════════════════════════════════════════ -->
+  <div class="alarm-backdrop" id="alarmBackdrop" role="dialog" aria-modal="true" aria-labelledby="alarmTitle" hidden>
     <div class="alarm-modal">
-      <div class="alarm-pulse" aria-hidden="true">⚠</div>
-      <h2 id="alarmTitle">ALERT DETECTED</h2>
-      <p id="alarmBody">Please stay attentive.</p>
-      <button class="btn btn-alarm-dismiss" id="btnDismissAlarm">Dismiss</button>
+      <div class="alarm-pulse" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h2 id="alarmTitle">SAFETY ALERT DETECTED</h2>
+      <p id="alarmBody">Driver attention warning detected. Please stay attentive on the road.</p>
+      <button class="btn btn-alarm-dismiss" id="btnDismissAlarm">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Dismiss Alert
+      </button>
     </div>
   </div>
 
 
-  <!-- ═══════════════════════════════════════════════════════
+  <!-- ═══════════════════════════════════════════════════════════
        FOOTER
-  ════════════════════════════════════════════════════════ -->
+  ════════════════════════════════════════════════════════════ -->
   <footer class="footer" role="contentinfo">
-    <span>DriverGuard · AI-powered driver monitoring</span>
-    <span>Backend: <code>http://127.0.0.1:5000</code></span>
+    <div class="footer-container">
+      <div class="footer-left">
+        <strong>DriverGuard Safety System</strong>
+        <span>Autonomous Edge AI Telemetry · MobileNetV2 + ResNet-18</span>
+      </div>
+      <div class="footer-right">
+        <span>Flask Gateway: <code>http://127.0.0.1:5000</code></span>
+      </div>
+    </div>
   </footer>
 
-
+  <!-- Application Script -->
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
