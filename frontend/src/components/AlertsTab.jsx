@@ -88,6 +88,5 @@ export function AlertsTab({ alertHistory, onClear, onOpenGallery, snapshotCount 
           </div>
         </div>
       </div>
-    </div>
   );
 }
