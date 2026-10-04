@@ -148,24 +148,16 @@ class DrowsinessDetector:
                 "Place best_finetuned.keras in the models/ directory."
             )
 
-        print(f"[Drowsiness] Loading model -> {self.model_path}")
         keras = _get_keras()
         self.model = keras.models.load_model(
             str(self.model_path), compile=False
         )
-        in_shape  = self.model.input_shape   # (None, 224, 224, 3)
-        out_shape = self.model.output_shape  # (None, 4)
-        print(
-            f"[Drowsiness] OK -- input={in_shape}  output={out_shape}  "
-            f"classes={self.class_names}"
-        )
+        in_shape  = self.model.input_shape
+        out_shape = self.model.output_shape
 
         expected_n = int(out_shape[-1])
         if expected_n != len(self.class_names):
-            print(
-                f"[Drowsiness] WARNING: model output={expected_n} classes but "
-                f"class_names has {len(self.class_names)} entries."
-            )
+            pass  # class count mismatch — silently continue
 
     # ------------------------------------------------------------------
     # Public API
