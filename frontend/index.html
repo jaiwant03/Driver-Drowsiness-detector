@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Driver Drowsiness Detection</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <div class="brand">
+                <div class="brand-icon">D</div>
+
+                <div>
+                    <h1>DriverGuard</h1>
+                    <p>Real-Time Drowsiness Detection</p>
+                </div>
+            </div>
+
+            <div class="connection">
+                <span id="connectionDot"></span>
+                <span id="connectionText">Backend Offline</span>
+            </div>
+
+        </header>
+
+
+        <!-- MAIN -->
+        <main class="dashboard">
+
+            <!-- CAMERA SECTION -->
+            <section class="camera-card">
+
+                <div class="section-header">
+
+                    <div>
+                        <h2>Driver Monitoring</h2>
+                        <p>Live camera analysis</p>
+                    </div>
+
+                    <div id="statusBadge" class="status waiting">
+                        WAITING
+                    </div>
+
+                </div>
+
+
+                <div class="camera-container">
+
+                    <video
+                        id="camera"
+                        autoplay
+                        muted
+                        playsinline
+                    ></video>
+
+                    <canvas
+                        id="captureCanvas"
+                        hidden
+                    ></canvas>
+
+
+                    <!-- Camera overlay -->
+                    <div class="camera-overlay">
+
+                        <div class="corner top-left"></div>
+                        <div class="corner top-right"></div>
+                        <div class="corner bottom-left"></div>
+                        <div class="corner bottom-right"></div>
+
+                    </div>
+
+
+                    <!-- Camera message -->
+                    <div
+                        id="cameraMessage"
+                        class="camera-message"
+                    >
+                        <div class="camera-message-icon">◉</div>
+
+                        <h3>Camera not started</h3>
+
+                        <p>
+                            Start the camera to begin monitoring.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- CAMERA CONTROLS -->
+                <div class="camera-controls">
+
+                    <button
+                        id="startButton"
+                        class="btn primary"
+                    >
+                        <span>▶</span>
+                        Start Monitoring
+                    </button>
+
+                    <button
+                        id="stopButton"
+                        class="btn danger"
+                        disabled
+                    >
+                        <span>■</span>
+                        Stop
+                    </button>
+
+                    <button
+                        id="resetButton"
+                        class="btn secondary"
+                    >
+                        ↻ Reset
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- CURRENT DETECTION -->
+            <section class="detection-card">
+
+                <div class="section-header">
+
+                    <div>
+                        <h2>Current Detection</h2>
+                        <p>Model prediction</p>
+                    </div>
+
+                </div>
+
+
+                <div class="main-detection">
+
+                    <div
+                        id="predictionIcon"
+                        class="prediction-icon alert-icon"
+                    >
+                        ✓
+                    </div>
+
+                    <div class="prediction-info">
+
+                        <span class="small-label">
+                            PREDICTION
+                        </span>
+
+                        <h2 id="prediction">
+                            Waiting
+                        </h2>
+
+                        <p id="rawPrediction">
+                            Raw: —
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONFIDENCE -->
+                <div class="confidence-section">
+
+                    <div class="metric-heading">
+
+                        <span>Confidence</span>
+
+                        <strong id="confidence">
+                            0%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress">
+                        <div
+                            id="confidenceBar"
+                            class="progress-bar"
+                            style="width: 0%"
+                        ></div>
+                    </div>
+
+                </div>
+
+
+                <!-- DROWSINESS -->
+                <div class="drowsiness-timer">
+
+                    <div>
+
+                        <span class="small-label">
+                            DROWSINESS DURATION
+                        </span>
+
+                        <strong id="drowsyTime">
+                            0.0 s
+                        </strong>
+
+                    </div>
+
+                    <div>
+
+                        <span class="small-label">
+                            DROWSY FRAMES
+                        </span>
+
+                        <strong id="drowsyFrames">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PROBABILITIES -->
+            <section class="probability-card">
+
+                <div class="section-header">
+
+                    <div>
+                        <h2>Class Probabilities</h2>
+                        <p>Model confidence by class</p>
+                    </div>
+
+                </div>
+
+
+                <div class="probability-list">
+
+                    <div class="probability-item">
+
+                        <div class="probability-title">
+                            <span>Eyes Closed</span>
+                            <strong id="closedProbability">
+                                0%
+                            </strong>
+                        </div>
+
+                        <div class="progress">
+                            <div
+                                id="closedBar"
+                                class="progress-bar"
+                                style="width: 0%"
+                            ></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="probability-item">
+
+                        <div class="probability-title">
+                            <span>Eyes Open</span>
+                            <strong id="openProbability">
+                                0%
+                            </strong>
+                        </div>
+
+                        <div class="progress">
+                            <div
+                                id="openBar"
+                                class="progress-bar"
+                                style="width: 0%"
+                            ></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="probability-item">
+
+                        <div class="probability-title">
+                            <span>No Yawn</span>
+                            <strong id="noYawnProbability">
+                                0%
+                            </strong>
+                        </div>
+
+                        <div class="progress">
+                            <div
+                                id="noYawnBar"
+                                class="progress-bar"
+                                style="width: 0%"
+                            ></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="probability-item">
+
+                        <div class="probability-title">
+                            <span>Yawn</span>
+                            <strong id="yawnProbability">
+                                0%
+                            </strong>
+                        </div>
+
+                        <div class="progress">
+                            <div
+                                id="yawnBar"
+                                class="progress-bar"
+                                style="width: 0%"
+                            ></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- STATISTICS -->
+            <section class="stats-grid">
+
+                <div class="stat-card">
+
+                    <span class="stat-icon">◉</span>
+
+                    <div>
+                        <span class="small-label">
+                            FRAMES ANALYZED
+                        </span>
+
+                        <strong id="totalFrames">
+                            0
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span class="stat-icon">!</span>
+
+                    <div>
+                        <span class="small-label">
+                            DROWSY EVENTS
+                        </span>
+
+                        <strong id="drowsyEvents">
+                            0
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span class="stat-icon">●</span>
+
+                    <div>
+                        <span class="small-label">
+                            FACE DETECTED
+                        </span>
+
+                        <strong id="faceDetected">
+                            —
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- ALARM -->
+        <div
+            id="alarmOverlay"
+            class="alarm-overlay"
+        >
+
+            <div class="alarm-box">
+
+                <div class="alarm-symbol">
+                    !
+                </div>
+
+                <h2>DROWSINESS DETECTED</h2>
+
+                <p>
+                    Please stay alert and take appropriate action.
+                </p>
+
+                <button
+                    id="dismissAlarm"
+                    class="btn alarm-button"
+                >
+                    Dismiss
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- FOOTER -->
+        <footer>
+
+            <p>
+                DriverGuard • AI-powered driver monitoring
+            </p>
+
+            <p>
+                Backend:
+                <span id="backendUrl">
+                    http://127.0.0.1:5000
+                </span>
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>

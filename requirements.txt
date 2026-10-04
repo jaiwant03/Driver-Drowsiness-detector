@@ -1,0 +1,34 @@
+# Driver Drowsiness & Distraction Detection System
+# ─────────────────────────────────────────────────
+# Install with:  pip install -r requirements.txt
+#
+# Python 3.9 – 3.11 recommended.
+# TensorFlow 2.16+ requires Python 3.9+.
+
+# ── Web framework ──────────────────────────────────────────────────
+Flask>=3.0.0
+flask-cors>=4.0.0
+
+# ── Deep learning — Keras / TensorFlow (drowsiness model) ─────────
+# best_finetuned.keras was saved with Keras 3.13+.
+# keras>=3.13.0 is required for deserializing Dense quantization_config.
+keras>=3.13.0
+tensorflow>=2.16.0
+
+# ── Deep learning — PyTorch (distraction model) ───────────────────
+# CPU-only build is sufficient; GPU detected automatically at runtime.
+# No torchvision needed — ResNet-18 is implemented from scratch.
+torch>=2.0.0
+
+# ── Computer vision ────────────────────────────────────────────────
+# opencv-python provides the Haar cascade face detector used by
+# the drowsiness module.
+opencv-python>=4.8.0
+
+# ── Numerical / image utilities ────────────────────────────────────
+numpy>=1.24.0
+Pillow>=9.5.0
+
+# ── Optional — fixes Windows optree compatibility issues with TF ───
+# Uncomment if you see "optree" import errors on Windows:
+# optree==0.14.0

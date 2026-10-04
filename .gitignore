@@ -1,0 +1,110 @@
+# ==============================================================================
+# DriverGuard — .gitignore
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Byte-compiled / optimized / DLL files
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ------------------------------------------------------------------------------
+# Virtual Environments (Python venv, virtualenv, conda)
+# ------------------------------------------------------------------------------
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+conda-env/
+
+# ------------------------------------------------------------------------------
+# Jupyter Notebook Checkpoints & Cache
+# ------------------------------------------------------------------------------
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# ------------------------------------------------------------------------------
+# Operating System & IDE Files
+# ------------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------------------------
+# Secrets & Environment Variables
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ------------------------------------------------------------------------------
+# Logs & Diagnostic Outputs
+# ------------------------------------------------------------------------------
+*.log
+logs/
+
+# ------------------------------------------------------------------------------
+# Temporary Scratch & Backup Directories
+# ------------------------------------------------------------------------------
+backup_pre_fix/
+distraction_extracted.txt
+drowsiness_extracted.txt
+_analysis_check.py
+parse_nb.py
+
+# ------------------------------------------------------------------------------
+# Model Weights & Checkpoints
+# ------------------------------------------------------------------------------
+# 1. Ignore root-level duplicate model files (canonical versions live in /models)
+/best_finetuned.keras
+/driver_distraction_resnet18_complete.pth
+
+# 2. General training checkpoints and raw datasets
+checkpoints/
+runs/
+wandb/
+data/
+dataset/
+datasets/
+raw_data/
+
+# ------------------------------------------------------------------------------
+# NOTE ON TRAINED MODEL WEIGHTS (models/):
+# - models/best_finetuned.keras (~23.7 MB)
+# - models/driver_distraction_resnet18_complete.pth (~44.8 MB)
+#
+# Both files are under GitHub's 50 MB / 100 MB limits, so they CAN be tracked 
+# if you want your repo to work immediately after `git clone`.
+#
+# If you prefer to keep your git repo lightweight and host models elsewhere 
+# (e.g. GitHub Releases, Google Drive, or Hugging Face), UNCOMMENT the lines below:
+# *.pth
+# *.keras
+# *.h5
+# *.pt
+# *.onnx
+# ------------------------------------------------------------------------------
