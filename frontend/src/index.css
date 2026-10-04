@@ -268,14 +268,14 @@ html, body {
 .nav-tab {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: none;
   border: none;
-  padding: 6px 14px;
-  border-radius: 8px;
+  padding: 8px 20px;
+  border-radius: 9px;
   font-family: var(--font-main);
-  font-size: 12.5px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 800;
   color: var(--navy-dark);
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -297,8 +297,8 @@ html, body {
 }
 
 .tab-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #FFFFFF;
 }
@@ -309,9 +309,9 @@ html, body {
 .tab-badge {
   background: var(--danger-bg);
   color: var(--danger-red-dark);
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 800;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: var(--radius-pill);
 }
 .nav-tab.active .tab-badge {
@@ -323,27 +323,27 @@ html, body {
 .cc-header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .backend-status {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 700;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
   color: var(--navy-dark);
   background: #FFFFFF;
   border: 1px solid var(--slate-border);
-  padding: 4px 10px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
-  height: 32px;
+  height: 40px;
   box-shadow: var(--shadow-subtle);
 }
 
 .status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--danger-red);
   transition: background 0.3s ease;
@@ -351,18 +351,18 @@ html, body {
 
 .status-dot.online {
   background: var(--safe-green);
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.25);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25);
 }
 
 .fps-badge {
-  font-size: 11.5px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
   color: var(--slate-text);
   background: #FFFFFF;
   border: 1px solid var(--slate-border);
-  padding: 4px 10px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
-  height: 32px;
+  height: 40px;
   display: flex;
   align-items: center;
   box-shadow: var(--shadow-subtle);
@@ -371,17 +371,17 @@ html, body {
 .header-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   background: #FFFFFF;
   border: 1px solid var(--slate-border);
-  border-radius: 8px;
-  padding: 4px 11px;
-  font-size: 11.5px;
-  font-weight: 700;
+  border-radius: 9px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 800;
   color: var(--navy-dark);
   cursor: pointer;
   transition: all 0.15s ease;
-  height: 32px;
+  height: 40px;
   box-shadow: var(--shadow-subtle);
 }
 
@@ -396,17 +396,17 @@ html, body {
   background: var(--orange-soft);
   border-color: var(--orange-primary);
   color: var(--orange-dark);
-  box-shadow: 0 0 0 1px var(--orange-primary);
+  box-shadow: 0 0 0 1.5px var(--orange-primary);
 }
 
 .header-icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   background: #FFFFFF;
   border: 1px solid var(--slate-border);
-  border-radius: 8px;
+  border-radius: 9px;
   color: var(--slate-text);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -426,7 +426,7 @@ html, body {
 .alert-bar-strip {
   width: 98%;
   max-width: 1720px;
-  margin: 6px auto 0;
+  margin: 12px auto 0;
   flex-shrink: 0;
 }
 
@@ -434,15 +434,43 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 14px;
-  border-radius: 10px;
+  padding: 10px 20px;
+  border-radius: 12px;
   background: var(--safe-bg);
   border: 1px solid var(--safe-border);
-  border-left: 5px solid var(--safe-green);
+  border-left: 6px solid var(--safe-green);
   color: var(--safe-text);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-  min-height: 36px;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.05);
+  min-height: 46px;
   transition: all 0.2s ease;
+}
+
+.alert-strip-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.alert-status-icon {
+  font-size: 18px;
+}
+
+.alert-strip-badge {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.alert-strip-divider {
+  color: currentColor;
+  opacity: 0.6;
+}
+
+.alert-strip-text {
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .alert-strip-content {
