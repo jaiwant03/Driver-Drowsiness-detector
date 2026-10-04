@@ -354,7 +354,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   MAIN CONTENT AREA
+   MAIN CONTENT AREA  —  Stylish, Geometric, Non-Cursive Typography
 ═══════════════════════════════════════════════════════════════════ */
 .main-content {
   flex: 1;
@@ -366,6 +366,44 @@
   overflow-x: hidden;
   overflow-y: auto;
   background: var(--bg-page);
+  font-family: "Urbanist", "Plus Jakarta Sans", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.main-content h1,
+.main-content h2,
+.main-content h3,
+.main-content .ap-title,
+.main-content .page-title,
+.main-content .db-hero-greeting,
+.main-content .db-section-heading,
+.main-content .ap-card-title,
+.main-content .ap-intro-title,
+.main-content .panel-header h2,
+.main-content .score-number,
+.main-content .ap-kpi-val,
+.main-content .db-card-val-navy {
+  font-family: "Space Grotesk", "Urbanist", sans-serif;
+}
+
+.main-content p,
+.main-content span,
+.main-content div,
+.main-content button,
+.main-content input,
+.main-content select,
+.main-content td,
+.main-content th {
+  font-family: "Urbanist", "Plus Jakarta Sans", sans-serif;
+}
+
+/* Preserve monospace for timers, metrics, latencies */
+.main-content pre,
+.main-content code,
+.main-content .cv-fps-chip,
+.main-content .ap-mono,
+.main-content [style*="monospace"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
 }
 
 .page-content {
