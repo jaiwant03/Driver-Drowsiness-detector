@@ -44,7 +44,7 @@ if sys.stderr and hasattr(sys.stderr, "reconfigure"):
     except Exception:
         pass
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from PIL import Image, UnidentifiedImageError
 
@@ -53,7 +53,6 @@ from PIL import Image, UnidentifiedImageError
 # ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = ROOT.parent  # Go up one level to project root
-FRONTEND_DIST = PROJECT_ROOT / "frontend" / "dist"
 sys.path.insert(0, str(ROOT))
 
 from utils.drowsiness   import DrowsinessDetector
@@ -92,10 +91,8 @@ _check_model(DISTRACTION_MODEL, "Distraction model (driver_distraction_resnet18_
 # ---------------------------------------------------------------------------
 # Flask app
 # ---------------------------------------------------------------------------
-app = Flask(__name__, template_folder="templates", static_folder="static")
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-CORS(app)
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # ---------------------------------------------------------------------------
 # Load both models once at startup
