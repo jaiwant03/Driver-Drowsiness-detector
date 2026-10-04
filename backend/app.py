@@ -325,9 +325,14 @@ def reset():
 if __name__ == "__main__":
     import logging
 
-    # Silence Flask/Werkzeug's default "* Running on ..." and request logs
+    # Silence all Flask/Werkzeug startup and request logs
     log = logging.getLogger("werkzeug")
     log.setLevel(logging.ERROR)
+    logging.getLogger("flask.app").setLevel(logging.ERROR)
+
+    # Suppress Flask's own "* Serving Flask app" / "* Debug mode" banner
+    import flask.cli
+    flask.cli.show_server_banner = lambda *args, **kwargs: None
 
     host = os.getenv("HOST", "127.0.0.1")
     port = int(os.getenv("PORT", "5000"))
