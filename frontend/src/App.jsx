@@ -147,8 +147,6 @@ export default function App() {
         return <HistoryPage />;
       case "settings":
         return <SettingsPage settings={settings} setSettings={setSettings} />;
-      case "help":
-        return <HelpPage />;
       default:
         return (
           <DashboardPage
