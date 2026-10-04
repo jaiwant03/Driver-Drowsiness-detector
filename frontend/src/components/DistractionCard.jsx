@@ -46,7 +46,7 @@ export function DistractionCard({ data }) {
             <path d="M12 12v9" />
             <circle cx="12" cy="12" r="3" />
           </svg>
-          <h2>DISTRACTION</h2>
+          <h2 className="ap-card-title-multicolor">DISTRACTION</h2>
         </div>
         <div className={`detection-badge ${badgeCls}`} id="distractionBadge">
           {badgeTxt}
