@@ -50,7 +50,8 @@ from PIL import Image, UnidentifiedImageError
 # Path setup
 # ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parent
-FRONTEND_DIST = ROOT / "frontend" / "dist"
+PROJECT_ROOT = ROOT.parent  # Go up one level to project root
+FRONTEND_DIST = PROJECT_ROOT / "frontend" / "dist"
 sys.path.insert(0, str(ROOT))
 
 from utils.drowsiness   import DrowsinessDetector
@@ -59,7 +60,7 @@ from utils.distraction  import DistractionDetector
 # ---------------------------------------------------------------------------
 # Model file paths
 # ---------------------------------------------------------------------------
-MODELS_DIR = ROOT / "models"
+MODELS_DIR = PROJECT_ROOT / "models"
 
 DROWSINESS_MODEL   = MODELS_DIR / "best_finetuned.keras"
 DISTRACTION_MODEL  = MODELS_DIR / "driver_distraction_resnet18_complete.pth"
