@@ -404,7 +404,7 @@ export function AnalyticsTab({
                 <polyline points="12 6 12 12 16 14" />
               </svg>
             </span>
-            SESSION EVENT TIMELINE
+            <span className="ap-card-title-multicolor">Session Event Timeline</span>
           </h2>
           <span className="ap-telemetry-tag" style={{ padding: "5px 12px", fontSize: "11.5px" }}>
             <span className="ap-pulse-dot" />
