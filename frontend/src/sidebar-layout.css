@@ -114,12 +114,12 @@
 }
 
 .sb-brand-name {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 800;
   color: #0F172A;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
   white-space: nowrap;
-  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
   line-height: 1.1;
 }
 
