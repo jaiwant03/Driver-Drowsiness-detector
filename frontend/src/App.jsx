@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDriverMonitor } from "./hooks/useDriverMonitor";
-import { Header } from "./components/Header";
-import { AlertBanner } from "./components/AlertBanner";
-import { LiveMonitor } from "./components/LiveMonitor";
-import { AnalyticsTab } from "./components/AnalyticsTab";
-import { AlertsTab } from "./components/AlertsTab";
-import { ReportTab } from "./components/ReportTab";
+import { Sidebar } from "./components/Sidebar";
+import { DashboardPage } from "./components/DashboardPage";
+import { LiveMonitorPage } from "./components/LiveMonitorPage";
+import { AnalyticsPage } from "./components/AnalyticsPage";
+import { AlertsPage } from "./components/AlertsPage";
+import { ReportsPage } from "./components/ReportsPage";
+import { HistoryPage } from "./components/HistoryPage";
+import { SettingsPage } from "./components/SettingsPage";
+import { HelpPage } from "./components/HelpPage";
 import { Modals } from "./components/Modals";
-import { Footer } from "./components/Footer";
+import { AlertBanner } from "./components/AlertBanner";
 
 export default function App() {
   const {
@@ -37,7 +40,6 @@ export default function App() {
     timelineEvents,
     snapshots,
     settings,
-    activeTab,
     focusMode,
     bannerDismissed,
     isSettingsOpen,
@@ -65,96 +67,29 @@ export default function App() {
     exportPDF,
   } = useDriverMonitor();
 
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [currentPage, setCurrentPage] = useState("dashboard");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Smooth scroll to section when tab clicked
-  const handleTabClick = (tabKey) => {
-    setActiveTab(tabKey);
-    const targetEl = document.getElementById(`${tabKey}-section`);
-    if (targetEl) {
-      const headerOffset = 80;
-      const elementPosition = targetEl.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  // Scroll spy to update active tab and scroll progress with smooth tracking
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (docHeight > 0) {
-        setScrollProgress((scrollY / docHeight) * 100);
-      } else {
-        setScrollProgress(0);
-      }
-      setShowScrollTop(scrollY > 300);
-
-      // Section spy to highlight current active tab accurately
-      const sections = ["live", "analytics", "alerts", "report"];
-      if (scrollY < 180) {
-        setActiveTab("live");
-      } else {
-        const scrollTrigger = scrollY + 160;
-        for (let i = sections.length - 1; i >= 0; i--) {
-          const el = document.getElementById(`${sections[i]}-section`);
-          if (el && el.offsetTop <= scrollTrigger) {
-            setActiveTab(sections[i]);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [setActiveTab]);
-
-  return (
-    <div className={`app-root ${focusMode ? "focus-mode-active" : ""}`}>
-      {/* Scroll Progress Indicator Bar */}
-      <div
-        className="scroll-progress-bar"
-        style={{ width: `${scrollProgress}%` }}
-        aria-hidden="true"
-      />
-
-      {/* 1. STICKY AUTOMOTIVE SAFETY CONSOLE HEADER */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={handleTabClick}
-        backendOnline={backendOnline}
-        fps={fps}
-        alertCount={alertHistory.length}
-        voiceEnabled={settings.voiceEnabled}
-        onToggleVoice={() =>
-          setSettings((prev) => ({ ...prev, voiceEnabled: !prev.voiceEnabled }))
-        }
-        focusMode={focusMode}
-        onToggleFocus={() => setFocusMode((prev) => !prev)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-      />
-
-      {/* 2. DYNAMIC SAFETY ALERT BANNER */}
-      {settings.visualEnabled && (
-        <AlertBanner
-          safetyLevel={safetyLevel}
-          safetyMessage={safetyMessage}
-          dismissed={bannerDismissed}
-          onDismiss={() => setBannerDismissed(true)}
-        />
-      )}
-
-      {/* 3. VERTICAL SCROLLING DASHBOARD MAIN CONTAINER */}
-      <main className="cc-viewport" id="dashboard">
-        {/* Section 1: Live Monitor & Driver Telemetry */}
-        <section id="live-section" className="dashboard-section">
-          <LiveMonitor
+  const renderPage = () => {
+    switch (currentPage) {
+      case "dashboard":
+        return (
+          <DashboardPage
+            safetyLevel={safetyLevel}
+            safetyMessage={safetyMessage}
+            currentScore={currentScore}
+            sessionSeconds={sessionSeconds}
+            maxFrames={maxFrames}
+            drowsyEvents={drowsyEvents}
+            yawnEvents={yawnEvents}
+            distractEvents={distractEvents}
+            drowsinessData={drowsinessData}
+            distractionData={distractionData}
+          />
+        );
+      case "live":
+        return (
+          <LiveMonitorPage
             videoRef={videoRef}
             canvasRef={canvasRef}
             monitoring={monitoring}
@@ -168,12 +103,13 @@ export default function App() {
             onStop={stopCamera}
             onReset={resetSession}
             onSnapshot={captureSnapshot}
+            backendOnline={backendOnline}
+            fps={fps}
           />
-        </section>
-
-        {/* Section 2: Real-Time Analytics, Donut & Trend Charts */}
-        <section id="analytics-section" className="dashboard-section">
-          <AnalyticsTab
+        );
+      case "analytics":
+        return (
+          <AnalyticsPage
             maxFrames={maxFrames}
             drowsyEvents={drowsyEvents}
             yawnEvents={yawnEvents}
@@ -185,21 +121,19 @@ export default function App() {
             drowsinessData={drowsinessData}
             distractionData={distractionData}
           />
-        </section>
-
-        {/* Section 3: Alert History & Event Log */}
-        <section id="alerts-section" className="dashboard-section">
-          <AlertsTab
+        );
+      case "alerts":
+        return (
+          <AlertsPage
             alertHistory={alertHistory}
             onClear={() => setAlertHistory([])}
             onOpenGallery={() => setIsGalleryOpen(true)}
             snapshotCount={snapshots.length}
           />
-        </section>
-
-        {/* Section 4: Fleet Safety Audit Report */}
-        <section id="report-section" className="dashboard-section">
-          <ReportTab
+        );
+      case "reports":
+        return (
+          <ReportsPage
             sessionSeconds={sessionSeconds}
             maxFrames={maxFrames}
             currentScore={currentScore}
@@ -209,18 +143,64 @@ export default function App() {
             onExportPDF={exportPDF}
             onExportCSV={exportCSV}
           />
-        </section>
-      </main>
+        );
+      case "history":
+        return <HistoryPage />;
+      case "settings":
+        return <SettingsPage settings={settings} setSettings={setSettings} />;
+      case "help":
+        return <HelpPage />;
+      default:
+        return (
+          <DashboardPage
+            safetyLevel={safetyLevel}
+            safetyMessage={safetyMessage}
+            currentScore={currentScore}
+            sessionSeconds={sessionSeconds}
+            maxFrames={maxFrames}
+            drowsyEvents={drowsyEvents}
+            yawnEvents={yawnEvents}
+            distractEvents={distractEvents}
+            drowsinessData={drowsinessData}
+            distractionData={distractionData}
+          />
+        );
+    }
+  };
 
-      {/* 4. COMPACT SYSTEM STATUS FOOTER */}
-      <Footer
+  return (
+    <div className={`app-root-sidebar ${sidebarCollapsed ? "sidebar-collapsed" : ""} ${focusMode ? "focus-mode-active" : ""}`}>
+      {/* Fixed Left Sidebar */}
+      <Sidebar
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        alertCount={alertHistory.length}
         backendOnline={backendOnline}
-        monitoring={monitoring}
-        latencyMs={latencyMs}
-        modelStats={modelStats}
+        cameraConnected={monitoring}
+        modelsActive={backendOnline}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
-      {/* 5. MODALS & OVERLAYS */}
+      {/* Main Content Area */}
+      <div className="main-content">
+        {/* Safety Alert Banner */}
+        {settings.visualEnabled && !bannerDismissed && safetyLevel !== "STANDBY" && (
+          <AlertBanner
+            safetyLevel={safetyLevel}
+            safetyMessage={safetyMessage}
+            dismissed={bannerDismissed}
+            onDismiss={() => setBannerDismissed(true)}
+          />
+        )}
+
+        {/* Page Content */}
+        <div className="page-content">
+          {renderPage()}
+        </div>
+      </div>
+
+      {/* Modals */}
       <Modals
         isSettingsOpen={isSettingsOpen}
         onCloseSettings={() => setIsSettingsOpen(false)}
@@ -240,7 +220,7 @@ export default function App() {
         distractEvents={distractEvents}
         onViewReport={() => {
           setIsSessionCompleteOpen(false);
-          handleTabClick("report");
+          setCurrentPage("reports");
         }}
         onExportCSV={exportCSV}
         isAlarmModalOpen={isAlarmModalOpen}
@@ -248,30 +228,7 @@ export default function App() {
         alarmDetails={alarmDetails}
       />
 
-      {/* Floating Back to Top Button */}
-      {showScrollTop && (
-        <button
-          className="btn-scroll-top"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          title="Scroll to Top"
-          aria-label="Scroll to Top"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m18 15-6-6-6 6" />
-          </svg>
-        </button>
-      )}
-
-      {/* Exit Focus Mode Floating Pill */}
+      {/* Exit Focus Mode Floating Button */}
       {focusMode && (
         <button
           className="btn-exit-focus"
