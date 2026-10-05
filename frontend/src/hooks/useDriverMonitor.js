@@ -140,8 +140,14 @@ export function useDriverMonitor() {
       phrase = "Warning. Drowsiness detected. Please stay alert.";
     } else if (drowsiness?.prediction === "yawn") {
       phrase = "Fatigue detected. Please remain attentive.";
-    } else if (distraction?.is_distracted && (distraction?.distracted_elapsed_seconds || 0) > 2.0) {
-      phrase = "Distraction detected. Please keep eyes on the road.";
+    } else if (distraction?.is_distracted && (distraction?.distracted_elapsed_seconds || 0) >= 1.0) {
+      if (distraction?.distraction_reason?.includes("Speaking") || distraction?.distraction_reason?.includes("Singing")) {
+        phrase = "Distraction detected. Please focus on the road and avoid talking while driving.";
+      } else if (distraction?.distraction_reason?.includes("Dancing") || distraction?.distraction_reason?.includes("Movement")) {
+        phrase = "Distraction detected. Excessive body movement detected. Please stay still and focus on driving.";
+      } else {
+        phrase = "Distraction detected. Please keep eyes on the road.";
+      }
     }
 
     if (phrase) {
