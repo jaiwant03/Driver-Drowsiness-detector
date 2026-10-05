@@ -287,7 +287,9 @@ export function useDriverMonitor() {
       setMaxFrames(prev => Math.max(prev, frames));
       if (drowsiness?.drowsy_events) setDrowsyEvents(prev => Math.max(prev, drowsiness.drowsy_events));
       if (distraction?.distracted_events) setDistractEvents(prev => Math.max(prev, distraction.distracted_events));
-      if (drowsiness?.prediction === "yawn" && drowsiness?.confidence > 0.4) {
+      if (drowsiness?.yawn_events !== undefined) {
+        setYawnEvents(prev => Math.max(prev, drowsiness.yawn_events));
+      } else if (drowsiness?.prediction === "yawn" && drowsiness?.confidence > 0.4) {
         setYawnEvents(prev => prev + 1);
       }
 
