@@ -270,14 +270,10 @@ class DistractionDetector:
             # must trigger distraction and alert.
             is_speaking = False
             if not is_yawn:
-                mar_val = computed_mar if computed_mar is not None else 0.0
-                print(f"[DBG] not is_yawn. mar_val={mar_val}, avg_lip={avg_lip_motion}, lip={lip_motion}")
-                if mar_val < 0.45:
-                    if avg_lip_motion >= 0.010 or lip_motion >= 0.014:
-                        is_speaking = True
-                    elif mar_val >= 0.12 and (avg_lip_motion >= 0.005 or lip_motion >= 0.008):
-                        is_speaking = True
-                print(f"[DBG] -> is_speaking={is_speaking}")
+                if avg_lip_motion >= 0.010 or lip_motion >= 0.014:
+                    is_speaking = True
+                elif (computed_mar is not None and 0.12 <= computed_mar <= 0.50 and (avg_lip_motion >= 0.005 or lip_motion >= 0.008)):
+                    is_speaking = True
 
             # 5. Multimodal Verification & Behavioral Gating
             candidate_class = "Safe Driving"
