@@ -424,6 +424,8 @@ class DistractionDetector:
                     self._alarm_active     = True
                     self._distracted_events += 1
                     alarm = True
+                elif self._alarm_active:
+                    alarm = True
 
                 status = "DISTRACTED"
             else:

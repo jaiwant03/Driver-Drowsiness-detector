@@ -305,6 +305,8 @@ class DrowsinessDetector:
                         self._alarm_active = True
                         self._drowsy_events += 1
                         alarm = True
+                    elif self._alarm_active:
+                        alarm = True
 
                     # Track discrete yawn episode
                     if final_class == "yawn" and not self._is_yawning_event:
