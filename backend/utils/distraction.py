@@ -269,10 +269,10 @@ class DistractionDetector:
             # Active when lips are moving or moderate open mouth, and NOT in a yawn state
             is_speaking = False
             if not is_yawn:
-                if avg_lip_motion >= 0.028 or lip_motion >= 0.050:
-                    if computed_mar is None or (0.10 <= computed_mar <= 0.44):
+                if avg_lip_motion >= 0.012 or lip_motion >= 0.016:
+                    if computed_mar is None or (0.08 <= computed_mar <= 0.44):
                         is_speaking = True
-                elif computed_mar is not None and (0.18 <= computed_mar <= 0.44) and (avg_lip_motion >= 0.015 or lip_motion >= 0.025):
+                elif computed_mar is not None and (0.14 <= computed_mar <= 0.44) and (avg_lip_motion >= 0.007 or lip_motion >= 0.009):
                     is_speaking = True
 
             # 5. Multimodal Verification & Behavioral Gating
