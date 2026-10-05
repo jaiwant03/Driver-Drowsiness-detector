@@ -465,6 +465,87 @@ class DrowsinessDetector:
             crops.append(right_eye)
         return crops
 
+    def _detect_mouth_yawn(
+        self, face_bgr: np.ndarray
+    ) -> tuple[bool, float, float, float, float]:
+        """
+        Analyze the mouth region of a detected face for yawning.
+        A yawn is characterized by a wide vertical mouth opening (MAR >= 0.45),
+        a dark central oral cavity, and significant mouth height relative to face height.
+
+        Returns: (is_yawn, mar, cavity_ratio, h_face_ratio, openness_score)
+        """
+        fh, fw = face_bgr.shape[:2]
+        if fh < 20 or fw < 20:
+            return False, 0.0, 0.0, 0.0, 0.0
+
+        # Anatomical mouth ROI: lower 38% of face (y: 60% to 98%), central 64% (x: 18% to 82%)
+        my1 = int(fh * 0.60)
+        my2 = int(fh * 0.98)
+        mx1 = int(fw * 0.18)
+        mx2 = int(fw * 0.82)
+
+        mouth_bgr = face_bgr[my1:my2, mx1:mx2]
+        mh, mw = mouth_bgr.shape[:2]
+        if mh < 8 or mw < 8:
+            return False, 0.0, 0.0, 0.0, 0.0
+
+        gray = cv2.cvtColor(mouth_bgr, cv2.COLOR_BGR2GRAY)
+        eq = cv2.equalizeHist(gray)
+
+        # Inside oral cavity is significantly darker than surrounding lips/skin
+        mean_val = float(np.mean(eq))
+        thresh_val = min(60, max(28, int(mean_val * 0.42)))
+        _, thresh = cv2.threshold(eq, thresh_val, 255, cv2.THRESH_BINARY_INV)
+
+        # Morphological closing to bridge teeth/tongue gaps inside the cavity
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
+        contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        max_area = 0.0
+        best_box = (0, 0, 0, 0)
+        for c in contours:
+            area = float(cv2.contourArea(c))
+            if area > max_area:
+                bx, by, bw, bh = cv2.boundingRect(c)
+                cy = by + bh / 2.0
+                cx = bx + bw / 2.0
+                # Must be centrally located within the mouth area (not outer edge/chin/corners)
+                if 0.10 * mh < cy < 0.90 * mh and 0.10 * mw < cx < 0.90 * mw:
+                    max_area = area
+                    best_box = (bx, by, bw, bh)
+
+        bx, by, bw, bh = best_box
+        mar = float(bh) / float(max(bw, 1))
+        cavity_ratio = float(max_area) / float(mh * mw)
+        h_face_ratio = float(bh) / float(fh)
+
+        # Openness score [0.0, 1.0]
+        openness_score = min(
+            1.0,
+            max(
+                0.0,
+                (mar - 0.25) / 0.35 * 0.4
+                + (cavity_ratio - 0.03) / 0.10 * 0.4
+                + (h_face_ratio - 0.05) / 0.10 * 0.2,
+            ),
+        )
+
+        # True yawn detection criteria:
+        # 1) High vertical aspect ratio with substantial face height & cavity
+        # 2) Or large oral cavity with high MAR
+        # 3) Or very large cavity
+        is_yawn = (
+            (mar >= 0.46 and h_face_ratio >= 0.10 and cavity_ratio >= 0.045)
+            or (mar >= 0.42 and cavity_ratio >= 0.09)
+            or (cavity_ratio >= 0.14 and mar >= 0.35)
+            or (openness_score >= 0.70 and mar >= 0.40)
+        )
+
+        return is_yawn, round(mar, 3), round(cavity_ratio, 4), round(h_face_ratio, 3), round(openness_score, 3)
+
     def _preprocess(self, image: Image.Image) -> np.ndarray:
         """
         Resize to 224×224, convert to float32 [0, 255].
@@ -513,6 +594,7 @@ class DrowsinessDetector:
         self._drowsy_frame_count = 0
         self._drowsy_start       = None
         self._alarm_active       = False
+        self._is_yawning_event   = False
 
     def _no_face_result(self) -> dict:
         return {
@@ -530,5 +612,6 @@ class DrowsinessDetector:
             "drowsy_elapsed_seconds": 0.0,
             "total_frames":           self._total_frames,
             "drowsy_events":          self._drowsy_events,
+            "yawn_events":            self._yawn_events,
             "probabilities":          {c: 0.0 for c in self.class_names},
         }
