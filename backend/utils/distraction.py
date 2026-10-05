@@ -384,6 +384,19 @@ class DistractionDetector:
             final_idx = self.class_names.index(final_class) if final_class in self.class_names else 0
 
             is_distracted = (final_class != "Safe Driving" and final_class != "Uncertain")
+            if not is_distracted:
+                distraction_reason = ""
+            elif not distraction_reason:
+                if is_dancing and is_speaking:
+                    distraction_reason = "Dancing & Singing"
+                elif is_speaking:
+                    distraction_reason = "Speaking / Singing"
+                elif is_dancing:
+                    distraction_reason = "Dancing / Excessive Movement"
+                elif final_class == "Talking to Passenger":
+                    distraction_reason = "Looking Away"
+                else:
+                    distraction_reason = final_class
 
             # 7. Alert & Debouncing Logic
             if is_distracted:
