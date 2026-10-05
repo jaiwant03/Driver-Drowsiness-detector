@@ -233,7 +233,7 @@ class DistractionDetector:
                         norm_mouth = cv2.resize(mouth_crop, (64, 40))
                         if self._prev_mouth_gray is not None:
                             m_diff = cv2.absdiff(norm_mouth, self._prev_mouth_gray)
-                            lip_motion = float(np.mean(m_diff > 14))
+                            lip_motion = float(np.mean(m_diff > 20))
                         self._prev_mouth_gray = norm_mouth
 
                         if computed_mar is None:
@@ -268,11 +268,16 @@ class DistractionDetector:
             # Lip movement / Speaking / Singing evaluation (not yawning):
             # The user requested: any lip movements, speaking, or singing (not yawning)
             # must trigger distraction and alert.
+            # If body movements are a 'little bit', it should NOT alert/distract.
             is_speaking = False
             if not is_yawn:
-                if avg_lip_motion >= 0.010 or lip_motion >= 0.014:
-                    is_speaking = True
-                elif (computed_mar is not None and 0.12 <= computed_mar <= 0.50 and (avg_lip_motion >= 0.005 or lip_motion >= 0.008)):
+                has_active_lip_motion = (avg_lip_motion >= 0.024 or lip_motion >= 0.030)
+                has_speech_mouth_aperture = (
+                    computed_mar is not None
+                    and 0.12 <= computed_mar <= 0.44
+                    and (avg_lip_motion >= 0.010 or lip_motion >= 0.015)
+                )
+                if has_active_lip_motion or has_speech_mouth_aperture:
                     is_speaking = True
 
             # 5. Multimodal Verification & Behavioral Gating
