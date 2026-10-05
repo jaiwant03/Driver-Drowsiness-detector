@@ -120,6 +120,8 @@ class DrowsinessDetector:
         # Counters (for UI stats)
         self._total_frames        = 0
         self._drowsy_events       = 0
+        self._yawn_events         = 0
+        self._is_yawning_event    = False
 
         # Last result cache
         self.last_prediction      = "Waiting"
@@ -204,39 +206,65 @@ class DrowsinessDetector:
             ]
 
             # Probabilities mapping: 0: Closed, 1: Open, 2: no_yawn, 3: yawn
-            yawn_p    = float(face_probs[3])
-            no_yawn_p = float(face_probs[2])
+            model_closed_p  = float(face_probs[0])
+            model_open_p    = float(face_probs[1])
+            model_no_yawn_p = float(face_probs[2])
+            model_yawn_p    = float(face_probs[3])
 
             if eye_probs_list:
                 avg_closed_p = float(np.mean([p[0] for p in eye_probs_list]))
                 avg_open_p   = float(np.mean([p[1] for p in eye_probs_list]))
             else:
-                avg_closed_p = float(face_probs[0])
-                avg_open_p   = float(face_probs[1])
+                avg_closed_p = model_closed_p
+                avg_open_p   = model_open_p
 
-            # Combined probabilities dictionary for frontend display
-            combined_raw = {
-                "Closed":  avg_closed_p,
-                "Open":    avg_open_p,
-                "no_yawn": no_yawn_p,
-                "yawn":    yawn_p,
-            }
-            total_prob = sum(combined_raw.values()) or 1.0
-            norm_probs = {k: round(v / total_prob, 4) for k, v in combined_raw.items()}
+            # 3. Dedicated mouth yawn analysis (Mouth Aspect Ratio + oral cavity darkness)
+            is_yawn_cv, mar, cavity_ratio, h_face_ratio, openness_score = self._detect_mouth_yawn(face_bgr)
 
-            # 3. Decision logic:
-            # - Yawn state: driver is yawning if yawn probability is high and exceeds eye closure
-            if yawn_p >= 0.65 and yawn_p > avg_closed_p:
+            # Combined yawn condition:
+            # - CV detected significant vertical oral cavity extension (MAR >= 0.45, dark oral cavity)
+            # - OR model yawn probability is elevated (>= 0.35)
+            # - OR both moderate openness and model yawn probability
+            is_yawning = (
+                is_yawn_cv
+                or (model_yawn_p >= 0.35)
+                or (openness_score >= 0.55 and model_yawn_p >= 0.15)
+            )
+
+            if is_yawning:
                 raw_class = "yawn"
-                confidence = float(norm_probs["yawn"])
-            # - Eye closed state: driver has eyes closed only if Closed strictly exceeds Open and is significant
+                final_yawn_p = max(0.86, openness_score, model_yawn_p)
+                confidence = float(final_yawn_p)
+                rem = max(0.04, 1.0 - final_yawn_p)
+                combined_raw = {
+                    "Closed":  round(avg_closed_p * rem * 0.15, 4),
+                    "Open":    round(avg_open_p * rem * 0.45, 4),
+                    "no_yawn": round(rem * 0.40, 4),
+                    "yawn":    round(final_yawn_p, 4),
+                }
             elif avg_closed_p > avg_open_p and avg_closed_p >= 0.50:
                 raw_class = "Closed"
-                confidence = float(norm_probs["Closed"])
-            # - Alert / Eyes open state: eyes are open
+                confidence = float(avg_closed_p)
+                rem = max(0.04, 1.0 - avg_closed_p)
+                combined_raw = {
+                    "Closed":  round(avg_closed_p, 4),
+                    "Open":    round(rem * 0.30, 4),
+                    "no_yawn": round(rem * 0.55, 4),
+                    "yawn":    round(rem * 0.15, 4),
+                }
             else:
                 raw_class = "Open"
-                confidence = float(norm_probs["Open"])
+                confidence = float(avg_open_p)
+                rem = max(0.04, 1.0 - avg_open_p)
+                combined_raw = {
+                    "Closed":  round(rem * 0.20, 4),
+                    "Open":    round(avg_open_p, 4),
+                    "no_yawn": round(rem * 0.65, 4),
+                    "yawn":    round(rem * 0.15, 4),
+                }
+
+            total_prob = sum(combined_raw.values()) or 1.0
+            norm_probs = {k: round(v / total_prob, 4) for k, v in combined_raw.items()}
 
             self._total_frames += 1
 
@@ -259,10 +287,14 @@ class DrowsinessDetector:
                     self._drowsy_frame_count += 1
                     elapsed = now - self._drowsy_start
 
+                    # Prompt alarm for yawning (3 frames / 0.8s) vs eye closure (10 frames / 2.0s)
+                    trigger_limit = 3 if final_class == "yawn" else self.drowsy_frame_limit
+                    time_limit    = 0.8 if final_class == "yawn" else self.alarm_time_seconds
+
                     if (
                         (
-                            self._drowsy_frame_count >= self.drowsy_frame_limit
-                            or elapsed >= self.alarm_time_seconds
+                            self._drowsy_frame_count >= trigger_limit
+                            or elapsed >= time_limit
                         )
                         and not self._alarm_active
                     ):
@@ -270,9 +302,15 @@ class DrowsinessDetector:
                         self._drowsy_events += 1
                         alarm = True
 
+                    # Track discrete yawn episode
+                    if final_class == "yawn" and not self._is_yawning_event:
+                        self._is_yawning_event = True
+                        self._yawn_events += 1
+
                     status = "DROWSY"
                 else:
                     self._reset_state(clear_history=False)
+                    self._is_yawning_event = False
                     status = "ALERT" if final_class in ALERT_CLASSES else "UNCERTAIN"
 
             self.last_prediction = final_class
@@ -298,7 +336,10 @@ class DrowsinessDetector:
                 "drowsy_elapsed_seconds": elapsed_s,
                 "total_frames":           self._total_frames,
                 "drowsy_events":          self._drowsy_events,
+                "yawn_events":            self._yawn_events,
                 "probabilities":          norm_probs,
+                "mouth_mar":              mar,
+                "mouth_openness":         openness_score,
             }
 
     def reset_all(self) -> None:
