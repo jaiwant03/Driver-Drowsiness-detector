@@ -111,6 +111,14 @@ class DistractionDetector:
         self._total_frames            = 0
         self._distracted_events       = 0
 
+        # Motion & Speech/Lip tracking
+        self._prev_frame_gray: np.ndarray | None = None
+        self._prev_face_center: tuple[float, float] | None = None
+        self._prev_mouth_gray: np.ndarray | None = None
+        self._body_motion_hist: deque[float] = deque(maxlen=8)
+        self._lip_motion_hist: deque[float] = deque(maxlen=8)
+        self._mar_hist: deque[float] = deque(maxlen=8)
+
         # Last result cache
         self.last_prediction          = "Waiting"
         self.last_confidence          = 0.0
