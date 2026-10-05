@@ -264,6 +264,8 @@ def predict():
             pil_image,
             face_detected=drowsiness_result.get("face_detected", None),
             face_box=drowsiness_result.get("face_box", None),
+            is_yawn=(drowsiness_result.get("prediction") == "yawn"),
+            mouth_mar=drowsiness_result.get("mouth_mar", None),
         )
     except Exception as exc:
         print(f"[Error] Prediction failed: {exc}")
@@ -293,7 +295,8 @@ def predict():
             safety_message = "DANGER: Drowsiness Detected!"
     elif is_distracted:
         safety_level   = "DISTRACTED"
-        safety_message = f"WARNING: Distraction Detected ({distraction_result.get('prediction', '')})!"
+        reason = distraction_result.get("distraction_reason") or distraction_result.get("prediction", "")
+        safety_message = f"WARNING: Distraction Detected ({reason})!"
     else:
         safety_level   = "SAFE"
         safety_message = "Driver is Attentive & Alert"
