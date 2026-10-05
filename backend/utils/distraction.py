@@ -140,10 +140,12 @@ class DistractionDetector:
         pil_image: Image.Image,
         face_detected: bool | None = None,
         face_box: list[int] | tuple[int, ...] | None = None,
+        is_yawn: bool = False,
+        mouth_mar: float | None = None,
     ) -> dict:
         """
         Run distraction inference on *pil_image* (any size, any mode).
-        Accepts optional face detection metadata from upstream pipeline.
+        Accepts optional face detection, yawn state, and mouth metrics from upstream pipeline.
         Returns a JSON-serialisable dict with calibrated prediction details.
         """
         with self._lock:
@@ -197,10 +199,87 @@ class DistractionDetector:
             elif (now - self._last_face_time) < 0.5 and self._last_face_box is not None:
                 current_face = self._last_face_box
 
-            # 4. Multimodal Verification & Behavioral Gating
+            # 4. Motion & Speech/Lip Movement Analysis
+            body_motion  = 0.0
+            head_disp    = 0.0
+            lip_motion   = 0.0
+            computed_mar = mouth_mar
+
+            if bgr_frame is not None:
+                gray = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2GRAY)
+                small_gray = cv2.resize(gray, (160, 120))
+                if self._prev_frame_gray is not None:
+                    diff = cv2.absdiff(small_gray, self._prev_frame_gray)
+                    body_motion = float(np.mean(diff > 18))
+                self._prev_frame_gray = small_gray
+                self._body_motion_hist.append(body_motion)
+
+                if current_face is not None:
+                    fx, fy, fw, fh = current_face
+                    fc_x = fx + fw / 2.0
+                    fc_y = fy + fh / 2.0
+                    if self._prev_face_center is not None:
+                        p_x, p_y = self._prev_face_center
+                        head_disp = float(np.sqrt((fc_x - p_x) ** 2 + (fc_y - p_y) ** 2))
+                    self._prev_face_center = (fc_x, fc_y)
+
+                    # Extract mouth ROI for lip movement analysis
+                    my1 = max(0, fy + int(fh * 0.60))
+                    my2 = min(frame_h, fy + int(fh * 0.98))
+                    mx1 = max(0, fx + int(fw * 0.18))
+                    mx2 = min(frame_w, fx + int(fw * 0.82))
+                    if my2 > my1 and mx2 > mx1:
+                        mouth_crop = gray[my1:my2, mx1:mx2]
+                        norm_mouth = cv2.resize(mouth_crop, (64, 40))
+                        if self._prev_mouth_gray is not None:
+                            m_diff = cv2.absdiff(norm_mouth, self._prev_mouth_gray)
+                            lip_motion = float(np.mean(m_diff > 14))
+                        self._prev_mouth_gray = norm_mouth
+
+                        if computed_mar is None:
+                            eq_m = cv2.equalizeHist(norm_mouth)
+                            _, th_m = cv2.threshold(eq_m, 50, 255, cv2.THRESH_BINARY_INV)
+                            cnts, _ = cv2.findContours(th_m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                            if cnts:
+                                best_c = max(cnts, key=cv2.contourArea)
+                                _, _, cbw, cbh = cv2.boundingRect(best_c)
+                                computed_mar = float(cbh) / float(max(cbw, 1))
+                            else:
+                                computed_mar = 0.0
+
+                    self._lip_motion_hist.append(lip_motion)
+                    if computed_mar is not None:
+                        self._mar_hist.append(computed_mar)
+
+            avg_body_motion = float(np.mean(self._body_motion_hist)) if self._body_motion_hist else 0.0
+            avg_lip_motion  = float(np.mean(self._lip_motion_hist)) if self._lip_motion_hist else 0.0
+
+            # Body movement evaluation:
+            # - 'little bit' movement (breathing, posture adjustments, minor steering sway):
+            #   avg_body_motion < 0.025 and head_disp < 15.0 -> NOT DISTRACTED
+            # - 'more' movement (dancing, vigorous swaying, rocking):
+            #   avg_body_motion >= 0.035 or (head_disp >= 18.0 and avg_body_motion >= 0.018) or head_disp >= 26.0
+            is_dancing = (
+                (avg_body_motion >= 0.035)
+                or (head_disp >= 18.0 and avg_body_motion >= 0.018)
+                or (head_disp >= 26.0)
+            )
+
+            # Lip movement / Speaking / Singing evaluation (not yawning):
+            # Active when lips are moving or moderate open mouth, and NOT in a yawn state
+            is_speaking = False
+            if not is_yawn:
+                if avg_lip_motion >= 0.028 or lip_motion >= 0.050:
+                    if computed_mar is None or (0.10 <= computed_mar <= 0.44):
+                        is_speaking = True
+                elif computed_mar is not None and (0.18 <= computed_mar <= 0.44) and (avg_lip_motion >= 0.015 or lip_motion >= 0.025):
+                    is_speaking = True
+
+            # 5. Multimodal Verification & Behavioral Gating
             candidate_class = "Safe Driving"
             candidate_conf  = 0.945
             candidate_idx   = 0
+            distraction_reason = ""
 
             if current_face is not None and bgr_frame is not None:
                 fx, fy, fw, fh = current_face
@@ -244,38 +323,61 @@ class DistractionDetector:
                     candidate_class = "Phone Call - Right Hand"
                     candidate_conf  = 0.915
                     candidate_idx   = 2
+                    distraction_reason = "Phone Call - Right Hand"
                 elif has_phone_left:
                     candidate_class = "Phone Call - Left Hand"
                     candidate_conf  = 0.915
                     candidate_idx   = 4
+                    distraction_reason = "Phone Call - Left Hand"
+                elif is_dancing and is_speaking:
+                    candidate_class = "Talking to Passenger"
+                    candidate_conf  = 0.930
+                    candidate_idx   = 9
+                    distraction_reason = "Dancing & Singing"
+                elif is_speaking:
+                    candidate_class = "Talking to Passenger"
+                    candidate_conf  = 0.920
+                    candidate_idx   = 9
+                    distraction_reason = "Speaking / Singing"
+                elif is_dancing:
+                    candidate_class = "Talking to Passenger"
+                    candidate_conf  = 0.920
+                    candidate_idx   = 9
+                    distraction_reason = "Dancing / Excessive Movement"
                 elif is_looking_away:
                     candidate_class = "Talking to Passenger"
                     candidate_conf  = 0.880
                     candidate_idx   = 9
+                    distraction_reason = "Looking Away"
                 elif is_looking_down:
                     candidate_idx   = 1 if raw_logits_np[1] >= raw_logits_np[3] else 3
                     candidate_class = self.class_names[candidate_idx]
                     candidate_conf  = 0.875
+                    distraction_reason = "Texting / Looking Down"
                 elif has_hair_makeup:
                     candidate_class = "Hair / Makeup"
                     candidate_conf  = 0.890
                     candidate_idx   = 8
+                    distraction_reason = "Hair / Makeup"
                 elif has_drinking:
                     candidate_class = "Drinking"
                     candidate_conf  = 0.860
                     candidate_idx   = 6
+                    distraction_reason = "Drinking"
                 else:
-                    # Attentive driver looking forward
+                    # Attentive driver looking forward (little bit movement is NOT distracted)
                     candidate_class = "Safe Driving"
                     candidate_conf  = 0.945
                     candidate_idx   = 0
+                    distraction_reason = ""
             else:
                 # No face detected in frame
                 candidate_class = "Safe Driving"
                 candidate_conf  = 0.850
                 candidate_idx   = 0
+                distraction_reason = ""
 
-            # 5. Temporal Smoothing (majority voting across recent frames)
+            # 6. Temporal Smoothing (majority voting across recent frames)
             self._history.append(candidate_class)
             counts = Counter(self._history)
             final_class, _ = counts.most_common(1)[0]
@@ -283,17 +385,21 @@ class DistractionDetector:
 
             is_distracted = (final_class != "Safe Driving" and final_class != "Uncertain")
 
-            # 6. Alert & Debouncing Logic
+            # 7. Alert & Debouncing Logic
             if is_distracted:
                 if self._distracted_start is None:
                     self._distracted_start = now
                 self._distracted_frame_count += 1
                 elapsed = now - self._distracted_start
 
+                # Prompt alarm for speaking/singing or dancing (8 frames / 1.0s) vs standard (20 frames / 2.5s)
+                trigger_limit = 8 if (is_speaking or is_dancing) else self.distracted_frame_limit
+                time_limit    = 1.0 if (is_speaking or is_dancing) else self.alarm_time_seconds
+
                 if (
                     (
-                        self._distracted_frame_count >= self.distracted_frame_limit
-                        or elapsed >= self.alarm_time_seconds
+                        self._distracted_frame_count >= trigger_limit
+                        or elapsed >= time_limit
                     )
                     and not self._alarm_active
                 ):
@@ -314,7 +420,7 @@ class DistractionDetector:
             if self._distracted_start is not None:
                 elapsed_s = round(now - self._distracted_start, 2)
 
-            # 7. Construct Calibrated Top-3 Predictions & Class Probabilities
+            # 8. Construct Calibrated Top-3 Predictions & Class Probabilities
             calibrated_probs: dict[str, float] = {}
             target_conf = float(candidate_conf)
             remaining_p = max(0.01, 1.0 - target_conf)
@@ -360,11 +466,17 @@ class DistractionDetector:
                 "confidence_decimal":         round(candidate_conf, 4),
                 "status":                     status,
                 "is_distracted":              is_distracted,
+                "distraction_reason":         distraction_reason,
                 "alarm":                      alarm,
                 "distracted_frame_count":     self._distracted_frame_count,
                 "distracted_elapsed_seconds": elapsed_s,
                 "total_frames":               self._total_frames,
                 "distracted_events":          self._distracted_events,
+                "body_motion":                round(avg_body_motion, 4),
+                "lip_motion":                 round(avg_lip_motion, 4),
+                "head_displacement":          round(head_disp, 1),
+                "is_dancing":                 is_dancing,
+                "is_speaking":                is_speaking,
                 "top_classes":                top3,
                 "probabilities":              calibrated_probs,
             }
@@ -377,6 +489,12 @@ class DistractionDetector:
             self._distracted_events = 0
             self._last_face_box     = None
             self._last_face_time    = 0.0
+            self._prev_frame_gray   = None
+            self._prev_face_center  = None
+            self._prev_mouth_gray   = None
+            self._body_motion_hist.clear()
+            self._lip_motion_hist.clear()
+            self._mar_hist.clear()
             self.last_prediction    = "Waiting"
             self.last_confidence    = 0.0
             self.last_status        = "WAITING"
