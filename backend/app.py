@@ -287,7 +287,10 @@ def predict():
         safety_message = "CRITICAL: Driver is Drowsy AND Distracted!"
     elif is_drowsy:
         safety_level   = "DROWSY"
-        safety_message = "DANGER: Drowsiness Detected!"
+        if drowsiness_result.get("prediction") == "yawn":
+            safety_message = "WARNING: Yawn / Driver Fatigue Detected!"
+        else:
+            safety_message = "DANGER: Drowsiness Detected!"
     elif is_distracted:
         safety_level   = "DISTRACTED"
         safety_message = f"WARNING: Distraction Detected ({distraction_result.get('prediction', '')})!"
