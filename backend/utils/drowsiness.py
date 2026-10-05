@@ -536,11 +536,12 @@ class DrowsinessDetector:
         best_box = (0, 0, 0, 0)
         for c in contours:
             area = float(cv2.contourArea(c))
-            if area > max_area:
-                bx, by, bw, bh = cv2.boundingRect(c)
+            bx, by, bw, bh = cv2.boundingRect(c)
+            solidity = area / max(float(bw * bh), 1.0)
+            # Oral cavity must be a solid region (solidity >= 0.35)
+            if area > max_area and solidity >= 0.35:
                 cy = by + bh / 2.0
                 cx = bx + bw / 2.0
-                # Must be centrally located within the mouth area (not outer edge/chin/corners)
                 if 0.10 * mh < cy < 0.90 * mh and 0.10 * mw < cx < 0.90 * mw:
                     max_area = area
                     best_box = (bx, by, bw, bh)
@@ -549,27 +550,29 @@ class DrowsinessDetector:
         mar = float(bh) / float(max(bw, 1))
         cavity_ratio = float(max_area) / float(mh * mw)
         h_face_ratio = float(bh) / float(fh)
+        solidity = max_area / max(float(bw * bh), 1.0) if max_area > 0 else 0.0
 
-        # Openness score [0.0, 1.0]
-        openness_score = min(
-            1.0,
-            max(
-                0.0,
-                (mar - 0.25) / 0.35 * 0.4
-                + (cavity_ratio - 0.03) / 0.10 * 0.4
-                + (h_face_ratio - 0.05) / 0.10 * 0.2,
-            ),
-        )
+        if solidity >= 0.35 and cavity_ratio >= 0.04:
+            openness_score = min(
+                1.0,
+                max(
+                    0.0,
+                    (mar - 0.30) / 0.35 * 0.4
+                    + (cavity_ratio - 0.04) / 0.10 * 0.4
+                    + (h_face_ratio - 0.06) / 0.10 * 0.2,
+                ),
+            )
+        else:
+            openness_score = 0.0
 
-        # True yawn detection criteria:
-        # 1) High vertical aspect ratio with substantial face height & cavity
-        # 2) Or large oral cavity with high MAR
-        # 3) Or very large cavity
         is_yawn = (
-            (mar >= 0.46 and h_face_ratio >= 0.10 and cavity_ratio >= 0.045)
-            or (mar >= 0.42 and cavity_ratio >= 0.09)
-            or (cavity_ratio >= 0.14 and mar >= 0.35)
-            or (openness_score >= 0.70 and mar >= 0.40)
+            solidity >= 0.35
+            and (
+                (mar >= 0.48 and h_face_ratio >= 0.10 and cavity_ratio >= 0.045)
+                or (mar >= 0.42 and cavity_ratio >= 0.09)
+                or (cavity_ratio >= 0.14 and mar >= 0.36)
+                or (openness_score >= 0.65 and mar >= 0.42 and cavity_ratio >= 0.05)
+            )
         )
 
         return is_yawn, round(mar, 3), round(cavity_ratio, 4), round(h_face_ratio, 3), round(openness_score, 3)
