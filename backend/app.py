@@ -83,8 +83,8 @@ DISTRACTION_THRESHOLD = 0.45   # below this → "Uncertain"
 
 # Alert debounce settings
 DROWSY_FRAME_LIMIT      = 10   # consecutive drowsy frames before alarm
-DISTRACTED_FRAME_LIMIT  = 10
-ALARM_SECONDS           = 2.0  # OR this many seconds of continuous state
+DISTRACTED_FRAME_LIMIT  = 20   # consecutive distracted frames before alarm
+ALARM_SECONDS           = 2.5  # OR this many seconds of continuous state
 
 # ---------------------------------------------------------------------------
 # Validate model files before starting
@@ -260,7 +260,11 @@ def predict():
     # --- Run both models on the same frame ---
     try:
         drowsiness_result  = drowsiness_detector.predict(pil_image)
-        distraction_result = distraction_detector.predict(pil_image)
+        distraction_result = distraction_detector.predict(
+            pil_image,
+            face_detected=drowsiness_result.get("face_detected", None),
+            face_box=drowsiness_result.get("face_box", None),
+        )
     except Exception as exc:
         print(f"[Error] Prediction failed: {exc}")
         traceback.print_exc()
@@ -275,7 +279,10 @@ def predict():
         or distraction_result.get("alarm", False)
     )
 
-    if is_drowsy and is_distracted:
+    if not face_detected:
+        safety_level   = "NO_FACE"
+        safety_message = "Driver face not detected"
+    elif is_drowsy and is_distracted:
         safety_level   = "CRITICAL"
         safety_message = "CRITICAL: Driver is Drowsy AND Distracted!"
     elif is_drowsy:
@@ -284,9 +291,6 @@ def predict():
     elif is_distracted:
         safety_level   = "DISTRACTED"
         safety_message = f"WARNING: Distraction Detected ({distraction_result.get('prediction', '')})!"
-    elif not face_detected:
-        safety_level   = "NO_FACE"
-        safety_message = "Driver face not detected"
     else:
         safety_level   = "SAFE"
         safety_message = "Driver is Attentive & Alert"

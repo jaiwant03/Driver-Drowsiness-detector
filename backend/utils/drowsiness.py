@@ -129,6 +129,8 @@ class DrowsinessDetector:
         # --- Load class names ---
         self.class_names = self._load_class_names(class_names_path)
 
+        self._last_face_rect: list[int] | None = None
+
         # --- Load OpenCV face and eye detectors ---
         cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         self._face_cascade = cv2.CascadeClassifier(cascade_path)
@@ -291,6 +293,7 @@ class DrowsinessDetector:
                 "is_drowsy":              is_drowsy,
                 "alarm":                  alarm,
                 "face_detected":          True,
+                "face_box":               self._last_face_rect,
                 "drowsy_frame_count":     self._drowsy_frame_count,
                 "drowsy_elapsed_seconds": elapsed_s,
                 "total_frames":           self._total_frames,
@@ -350,10 +353,12 @@ class DrowsinessDetector:
         )
 
         if not isinstance(faces, np.ndarray) or len(faces) == 0:
+            self._last_face_rect = None
             return None, None, False
 
         # Pick the largest face by area
         x, y, w, h = max(faces, key=lambda r: r[2] * r[3])
+        self._last_face_rect = [int(x), int(y), int(w), int(h)]
 
         # 15 % padding around the face
         pad  = int(0.15 * max(w, h))
@@ -477,6 +482,7 @@ class DrowsinessDetector:
             "is_drowsy":              False,
             "alarm":                  False,
             "face_detected":          False,
+            "face_box":               None,
             "drowsy_frame_count":     0,
             "drowsy_elapsed_seconds": 0.0,
             "total_frames":           self._total_frames,
