@@ -346,11 +346,13 @@ class DrowsinessDetector:
         """Reset all counters and state (called from /api/reset endpoint)."""
         with self._lock:
             self._reset_state(clear_history=True)
-            self._total_frames   = 0
-            self._drowsy_events  = 0
-            self.last_prediction = "Waiting"
-            self.last_confidence = 0.0
-            self.last_status     = "WAITING"
+            self._total_frames       = 0
+            self._drowsy_events      = 0
+            self._yawn_events        = 0
+            self._is_yawning_event   = False
+            self.last_prediction     = "Waiting"
+            self.last_confidence     = 0.0
+            self.last_status         = "WAITING"
 
     # ------------------------------------------------------------------
     # Internal helpers
