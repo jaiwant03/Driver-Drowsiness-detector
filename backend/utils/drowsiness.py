@@ -132,6 +132,7 @@ class DrowsinessDetector:
         self.class_names = self._load_class_names(class_names_path)
 
         self._last_face_rect: list[int] | None = None
+        self._face_lost_count: int = 0
 
         # --- Load OpenCV face and eye detectors ---
         cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
@@ -141,6 +142,9 @@ class DrowsinessDetector:
                 f"OpenCV Haar cascade not found at: {cascade_path}\n"
                 "Install opencv-python: pip install opencv-python"
             )
+
+        alt_cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_alt2.xml"
+        self._face_cascade_alt = cv2.CascadeClassifier(alt_cascade_path)
 
         eye_cascade_path = cv2.data.haarcascades + "haarcascade_eye.xml"
         self._eye_cascade = cv2.CascadeClassifier(eye_cascade_path)
@@ -395,10 +399,34 @@ class DrowsinessDetector:
             flags=cv2.CASCADE_SCALE_IMAGE,
         )
 
+        if (not isinstance(faces, np.ndarray) or len(faces) == 0) and hasattr(self, "_face_cascade_alt") and self._face_cascade_alt and not self._face_cascade_alt.empty():
+            faces = self._face_cascade_alt.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=3,
+                minSize=(50, 50),
+                flags=cv2.CASCADE_SCALE_IMAGE,
+            )
+
         if not isinstance(faces, np.ndarray) or len(faces) == 0:
+            # Face persistence: retain face bounding box for up to 15 frames if momentarily lost (e.g. wide yawn)
+            if self._last_face_rect is not None and self._face_lost_count < 15:
+                self._face_lost_count += 1
+                x, y, w, h = self._last_face_rect
+                pad  = int(0.18 * max(w, h))
+                x1   = max(0, x - pad)
+                y1   = max(0, y - pad)
+                x2   = min(bgr.shape[1], x + w + pad)
+                y2   = min(bgr.shape[0], y + h + pad)
+                face_bgr = bgr[y1:y2, x1:x2]
+                if face_bgr.size > 0:
+                    face_rgb = cv2.cvtColor(face_bgr, cv2.COLOR_BGR2RGB)
+                    return Image.fromarray(face_rgb), face_bgr, True
             self._last_face_rect = None
+            self._face_lost_count = 0
             return None, None, False
 
+        self._face_lost_count = 0
         # Pick the largest face by area
         x, y, w, h = max(faces, key=lambda r: r[2] * r[3])
         self._last_face_rect = [int(x), int(y), int(w), int(h)]
@@ -591,6 +619,8 @@ class DrowsinessDetector:
     def _reset_state(self, *, clear_history: bool) -> None:
         if clear_history:
             self._history.clear()
+            self._last_face_rect   = None
+            self._face_lost_count  = 0
         self._drowsy_frame_count = 0
         self._drowsy_start       = None
         self._alarm_active       = False
