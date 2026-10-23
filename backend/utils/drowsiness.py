@@ -113,6 +113,7 @@ class DrowsinessDetector:
 
         # Temporal state
         self._history: deque[str] = deque(maxlen=smoothing_window)
+        self._stable_class = "Open"
         self._drowsy_frame_count  = 0
         self._drowsy_start: float | None = None
         self._alarm_active        = False
@@ -291,8 +292,8 @@ class DrowsinessDetector:
                     self._drowsy_frame_count += 1
                     elapsed = now - self._drowsy_start
 
-                    # Prompt alarm for yawning (3 frames / 0.8s) vs eye closure (10 frames / 2.0s)
-                    trigger_limit = 3 if final_class == "yawn" else self.drowsy_frame_limit
+                    # Require a sustained yawn as well as sustained eye closure.
+                    trigger_limit = 24 if final_class == "yawn" else self.drowsy_frame_limit
                     time_limit    = 0.8 if final_class == "yawn" else self.alarm_time_seconds
 
                     if (
@@ -614,16 +615,18 @@ class DrowsinessDetector:
     def _smooth(self, raw_class: str) -> str:
         """Majority-vote smoothing over the recent prediction window."""
         self._history.append(raw_class)
-        if len(self._history) < 2:
-            return raw_class
         counts: dict[str, int] = {}
         for item in self._history:
             counts[item] = counts.get(item, 0) + 1
-        return max(counts, key=counts.get)  # type: ignore[arg-type]
+        voted_class = max(counts, key=counts.get)
+        if counts[voted_class] >= self.smoothing_window // 2 + 1:
+            self._stable_class = voted_class
+        return self._stable_class
 
     def _reset_state(self, *, clear_history: bool) -> None:
         if clear_history:
             self._history.clear()
+            self._stable_class = "Open"
             self._last_face_rect   = None
             self._face_lost_count  = 0
         self._drowsy_frame_count = 0

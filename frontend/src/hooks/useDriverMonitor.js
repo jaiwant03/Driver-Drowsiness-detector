@@ -76,6 +76,8 @@ export function useDriverMonitor() {
   const sessionClockRef = useRef(null);
   const isProcessingRef = useRef(false);
   const lastVoiceTsRef = useRef(0);
+  const lastVoicePhraseRef = useRef("");
+  const alarmWasActiveRef = useRef(false);
   const lastLoggedEventRef = useRef("");
   const confSumRef = useRef(0);
   const confCountRef = useRef(0);
@@ -131,7 +133,6 @@ export function useDriverMonitor() {
   const evaluateVoiceAlert = useCallback((drowsiness, distraction, lvl) => {
     if (!settings.voiceEnabled) return;
     const now = performance.now();
-    if (now - lastVoiceTsRef.current < CONFIG.voiceCooldownMs) return;
 
     let phrase = null;
     if (lvl === "CRITICAL") {
@@ -150,10 +151,16 @@ export function useDriverMonitor() {
       }
     }
 
-    if (phrase) {
-      speakVoiceAlert(phrase);
-      lastVoiceTsRef.current = now;
+    if (!phrase) {
+      lastVoicePhraseRef.current = "";
+      lastVoiceTsRef.current = 0;
+      return;
     }
+
+    if (phrase === lastVoicePhraseRef.current || now - lastVoiceTsRef.current < CONFIG.voiceCooldownMs) return;
+    speakVoiceAlert(phrase);
+    lastVoicePhraseRef.current = phrase;
+    lastVoiceTsRef.current = now;
   }, [settings.voiceEnabled, speakVoiceAlert]);
 
   // Health Check Poller
@@ -319,7 +326,7 @@ export function useDriverMonitor() {
       evaluateVoiceAlert(drowsiness, distraction, safety_level);
 
       // Emergent Alarm
-      if (alarm && settings.criticalEnabled) {
+      if (alarm && !alarmWasActiveRef.current && settings.criticalEnabled) {
         setIsAlarmModalOpen(true);
         setAlarmDetails({
           title: `${safety_level} SAFETY ALERT`,
@@ -327,6 +334,7 @@ export function useDriverMonitor() {
         });
         playAlarmBeep();
       }
+      alarmWasActiveRef.current = alarm;
 
       // Record alert in table
       if (safety_level === "DROWSY" || safety_level === "DISTRACTED" || safety_level === "CRITICAL") {
@@ -364,6 +372,9 @@ export function useDriverMonitor() {
       setSafetyLevel("SAFE");
       setSafetyMessage("Driver is Attentive & Alert");
       setBannerDismissed(false);
+      alarmWasActiveRef.current = false;
+      lastVoicePhraseRef.current = "";
+      lastVoiceTsRef.current = 0;
 
       // Start Session Timer
       setSessionSeconds(0);
@@ -403,6 +414,9 @@ export function useDriverMonitor() {
 
     setSafetyLevel("STANDBY");
     setSafetyMessage("Monitoring paused");
+    alarmWasActiveRef.current = false;
+    lastVoicePhraseRef.current = "";
+    lastVoiceTsRef.current = 0;
     addTimelineEvent("SESSION PAUSED", "warn");
     setIsSessionCompleteOpen(true);
   };
@@ -448,6 +462,9 @@ export function useDriverMonitor() {
     setAlertHistory([]);
     setSnapshots([]);
     setIsAlarmModalOpen(false);
+    alarmWasActiveRef.current = false;
+    lastVoicePhraseRef.current = "";
+    lastVoiceTsRef.current = 0;
     confSumRef.current = 0;
     confCountRef.current = 0;
     addTimelineEvent("System Initialized & Reset", "safe");

@@ -104,7 +104,7 @@ The backend requires model files from the `../models/` directory:
 Key settings in `app.py`:
 - `DROWSINESS_THRESHOLD = 0.40` - Confidence threshold for drowsiness
 - `DISTRACTION_THRESHOLD = 0.45` - Confidence threshold for distraction
-- `DROWSY_FRAME_LIMIT = 10` - Consecutive frames before alarm
+- `DROWSY_FRAME_LIMIT = 30` - Consecutive frames before eye-closure alarm (brief blinks are ignored)
 - `ALARM_SECONDS = 2.0` - Duration threshold for alarm
 
 ## Troubleshooting

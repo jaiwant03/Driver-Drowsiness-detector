@@ -103,6 +103,7 @@ class DistractionDetector:
 
         # Temporal state (majority vote over last N predictions)
         self._history: deque[str]     = deque(maxlen=smoothing_window)
+        self._stable_class            = "Safe Driving"
         self._distracted_frame_count  = 0
         self._distracted_start: float | None = None
         self._alarm_active            = False
@@ -254,21 +255,16 @@ class DistractionDetector:
             avg_body_motion = float(np.mean(self._body_motion_hist)) if self._body_motion_hist else 0.0
             avg_lip_motion  = float(np.mean(self._lip_motion_hist)) if self._lip_motion_hist else 0.0
 
-            # Body movement evaluation:
-            # - 'little bit' movement (breathing, posture adjustments, minor steering sway):
-            #   avg_body_motion < 0.025 and head_disp < 15.0 -> NOT DISTRACTED
-            # - 'more' movement (dancing, vigorous swaying, rocking):
-            #   avg_body_motion >= 0.035 or (head_disp >= 18.0 and avg_body_motion >= 0.018) or head_disp >= 26.0
+            # Keep motion and speech as diagnostic signals; neither alone proves
+            # that the driver has taken their attention off the road.
             is_dancing = (
                 (avg_body_motion >= 0.035)
                 or (head_disp >= 18.0 and avg_body_motion >= 0.018)
                 or (head_disp >= 26.0)
             )
 
-            # Lip movement / Speaking / Singing evaluation (not yawning):
-            # The user requested: any lip movements, speaking, or singing (not yawning)
-            # must trigger distraction and alert.
-            # If body movements are a 'little bit', it should NOT alert/distract.
+            # Lip movement is reported for diagnostics but is not, by itself,
+            # evidence of unsafe visual distraction.
             is_speaking = False
             if not is_yawn:
                 has_active_lip_motion = (avg_lip_motion >= 0.024 or lip_motion >= 0.030)
@@ -334,21 +330,6 @@ class DistractionDetector:
                     candidate_conf  = 0.915
                     candidate_idx   = 4
                     distraction_reason = "Phone Call - Left Hand"
-                elif is_dancing and is_speaking:
-                    candidate_class = "Talking to Passenger"
-                    candidate_conf  = 0.930
-                    candidate_idx   = 9
-                    distraction_reason = "Dancing & Singing"
-                elif is_speaking:
-                    candidate_class = "Talking to Passenger"
-                    candidate_conf  = 0.920
-                    candidate_idx   = 9
-                    distraction_reason = "Speaking / Singing"
-                elif is_dancing:
-                    candidate_class = "Talking to Passenger"
-                    candidate_conf  = 0.920
-                    candidate_idx   = 9
-                    distraction_reason = "Dancing / Excessive Movement"
                 elif is_looking_away:
                     candidate_class = "Talking to Passenger"
                     candidate_conf  = 0.880
@@ -383,22 +364,14 @@ class DistractionDetector:
                 distraction_reason = ""
 
             # 6. Temporal Smoothing (majority voting across recent frames)
-            self._history.append(candidate_class)
-            counts = Counter(self._history)
-            final_class, _ = counts.most_common(1)[0]
+            final_class = self._smooth(candidate_class)
             final_idx = self.class_names.index(final_class) if final_class in self.class_names else 0
 
             is_distracted = (final_class != "Safe Driving" and final_class != "Uncertain")
             if not is_distracted:
                 distraction_reason = ""
             elif not distraction_reason:
-                if is_dancing and is_speaking:
-                    distraction_reason = "Dancing & Singing"
-                elif is_speaking:
-                    distraction_reason = "Speaking / Singing"
-                elif is_dancing:
-                    distraction_reason = "Dancing / Excessive Movement"
-                elif final_class == "Talking to Passenger":
+                if final_class == "Talking to Passenger":
                     distraction_reason = "Looking Away"
                 else:
                     distraction_reason = final_class
@@ -410,9 +383,8 @@ class DistractionDetector:
                 self._distracted_frame_count += 1
                 elapsed = now - self._distracted_start
 
-                # Prompt alarm for speaking/singing or dancing (8 frames / 1.0s) vs standard (20 frames / 2.5s)
-                trigger_limit = 8 if (is_speaking or is_dancing) else self.distracted_frame_limit
-                time_limit    = 1.0 if (is_speaking or is_dancing) else self.alarm_time_seconds
+                trigger_limit = self.distracted_frame_limit
+                time_limit    = self.alarm_time_seconds
 
                 if (
                     (
@@ -523,6 +495,15 @@ class DistractionDetector:
     # Internal helpers
     # ------------------------------------------------------------------
 
+    def _smooth(self, candidate_class: str) -> str:
+        """Switch classes only after a strict majority in the full window."""
+        self._history.append(candidate_class)
+        counts = Counter(self._history)
+        voted_class, vote_count = counts.most_common(1)[0]
+        if vote_count >= self.smoothing_window // 2 + 1:
+            self._stable_class = voted_class
+        return self._stable_class
+
     def _load_model(self) -> None:
         if not self.model_path.exists():
             raise FileNotFoundError(
@@ -577,6 +558,7 @@ class DistractionDetector:
     def _reset_state(self, *, clear_history: bool) -> None:
         if clear_history:
             self._history.clear()
+            self._stable_class = "Safe Driving"
         self._distracted_frame_count = 0
         self._distracted_start       = None
         self._alarm_active           = False

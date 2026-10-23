@@ -82,7 +82,7 @@ DROWSINESS_THRESHOLD  = 0.40   # below this → "Low Confidence"
 DISTRACTION_THRESHOLD = 0.45   # below this → "Uncertain"
 
 # Alert debounce settings
-DROWSY_FRAME_LIMIT      = 10   # consecutive drowsy frames before alarm
+DROWSY_FRAME_LIMIT      = 30   # consecutive drowsy frames before alarm
 DISTRACTED_FRAME_LIMIT  = 20   # consecutive distracted frames before alarm
 ALARM_SECONDS           = 2.5  # OR this many seconds of continuous state
 
