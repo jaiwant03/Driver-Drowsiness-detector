@@ -284,9 +284,9 @@ class DrowsinessDetector:
                 is_drowsy   = False
             else:
                 final_class = self._smooth(raw_class)
-                is_drowsy   = final_class in DROWSY_CLASSES
+                drowsy_candidate = final_class in DROWSY_CLASSES
 
-                if is_drowsy:
+                if drowsy_candidate:
                     if self._drowsy_start is None:
                         self._drowsy_start = now
                     self._drowsy_frame_count += 1
@@ -296,13 +296,11 @@ class DrowsinessDetector:
                     trigger_limit = 24 if final_class == "yawn" else self.drowsy_frame_limit
                     time_limit    = 0.8 if final_class == "yawn" else self.alarm_time_seconds
 
-                    if (
-                        (
-                            self._drowsy_frame_count >= trigger_limit
-                            or elapsed >= time_limit
-                        )
-                        and not self._alarm_active
-                    ):
+                    is_drowsy = (
+                        self._drowsy_frame_count >= trigger_limit
+                        or elapsed >= time_limit
+                    )
+                    if is_drowsy and not self._alarm_active:
                         self._alarm_active = True
                         self._drowsy_events += 1
                         alarm = True
@@ -310,14 +308,15 @@ class DrowsinessDetector:
                         alarm = True
 
                     # Track discrete yawn episode
-                    if final_class == "yawn" and not self._is_yawning_event:
+                    if is_drowsy and final_class == "yawn" and not self._is_yawning_event:
                         self._is_yawning_event = True
                         self._yawn_events += 1
 
-                    status = "DROWSY"
+                    status = "DROWSY" if is_drowsy else "MONITORING"
                 else:
                     self._reset_state(clear_history=False)
                     self._is_yawning_event = False
+                    is_drowsy = False
                     status = "ALERT" if final_class in ALERT_CLASSES else "UNCERTAIN"
 
             self.last_prediction = final_class
