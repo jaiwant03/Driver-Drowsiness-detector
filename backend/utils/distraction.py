@@ -158,7 +158,6 @@ class DistractionDetector:
             tensor = self._preprocess(pil_image)
             with torch.no_grad():
                 logits = self.model(tensor)
-                raw_logits_np: np.ndarray = logits[0].cpu().numpy()
                 probs = torch.softmax(logits, dim=1)[0]
                 probs_np: np.ndarray = probs.cpu().numpy()
 
@@ -284,9 +283,6 @@ class DistractionDetector:
 
             if current_face is not None and bgr_frame is not None:
                 fx, fy, fw, fh = current_face
-                fc_x = (fx + fw / 2.0) / frame_w
-                fc_y = (fy + fh / 2.0) / frame_h
-
                 # HSV skin & edge detection for hands/phone
                 hsv = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2HSV)
                 skin_mask = cv2.inRange(hsv, (0, 25, 45), (25, 255, 255))
@@ -313,12 +309,18 @@ class DistractionDetector:
                 mouth_skin = np.mean(skin_mask[mouth_y1:mouth_y2, fx:fx+fw] > 0) if (mouth_y2 > mouth_y1 and fw > 0) else 0.0
 
                 # Evidence thresholds
-                has_phone_right = (r_skin > 0.40 and raw_logits_np[2] > -0.8)
-                has_phone_left  = (l_skin > 0.40 and raw_logits_np[4] > -0.8)
-                has_hair_makeup = (hair_skin > 0.38 and raw_logits_np[8] > 2.0)
-                has_drinking    = (mouth_skin > 0.42 and raw_logits_np[6] > 0.5)
-                is_looking_away = (fc_x < 0.20 or fc_x > 0.80)
-                is_looking_down = (fc_y > 0.74 and (raw_logits_np[1] > -0.8 or raw_logits_np[3] > -0.8))
+                model_confidence = float(probs_np[raw_pred_idx])
+                has_phone_right = (r_skin > 0.40 and probs_np[2] >= self.confidence_threshold)
+                has_phone_left  = (l_skin > 0.40 and probs_np[4] >= self.confidence_threshold)
+                has_hair_makeup = (hair_skin > 0.38 and probs_np[8] >= self.confidence_threshold)
+                has_drinking    = (mouth_skin > 0.42 and probs_np[6] >= self.confidence_threshold)
+                is_looking_away = (
+                    raw_class == "Talking to Passenger" and model_confidence >= 0.70
+                )
+                is_looking_down = (
+                    raw_class in ("Texting - Right Hand", "Texting - Left Hand")
+                    and model_confidence >= 0.70
+                )
 
                 if has_phone_right:
                     candidate_class = "Phone Call - Right Hand"
@@ -336,7 +338,7 @@ class DistractionDetector:
                     candidate_idx   = 9
                     distraction_reason = "Looking Away"
                 elif is_looking_down:
-                    candidate_idx   = 1 if raw_logits_np[1] >= raw_logits_np[3] else 3
+                    candidate_idx   = raw_pred_idx
                     candidate_class = self.class_names[candidate_idx]
                     candidate_conf  = 0.875
                     distraction_reason = "Texting / Looking Down"
