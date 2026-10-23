@@ -57,6 +57,7 @@ if sys.stderr and hasattr(sys.stderr, "reconfigure"):
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from PIL import Image, UnidentifiedImageError
+from werkzeug.wrappers import Request
 
 # ---------------------------------------------------------------------------
 # Path setup
@@ -143,7 +144,7 @@ print("Both models loaded successfully")
 # Helper — decode incoming image (multipart, base64-JSON, or raw bytes)
 # ---------------------------------------------------------------------------
 
-def _decode_image(req: "request") -> Image.Image:
+def _decode_image(req: Request) -> Image.Image:
     """
     Try three strategies in order:
       1. multipart/form-data  →  req.files["frame"]
